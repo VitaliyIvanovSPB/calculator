@@ -6,7 +6,7 @@ cpus_intel = [
         'cores_quantity': 24,
         'cores_frequency': 2400,
         'price': 2174,
-        'soket': 4189,
+        'socket': 4189,
         'ram_gen': 'DDR4',
     },
     {
@@ -15,7 +15,7 @@ cpus_intel = [
         'cores_quantity': 16,
         'cores_frequency': 2400,
         'price': 784,
-        'soket': 4189,
+        'socket': 4189,
         'ram_gen': 'DDR4',
     },
     {
@@ -24,7 +24,7 @@ cpus_intel = [
         'cores_quantity': 16,
         'cores_frequency': 3600,
         'price': 3376,
-        'soket': 4677,
+        'socket': 4677,
         'ram_gen': 'DDR5',
     },
     {
@@ -33,16 +33,16 @@ cpus_intel = [
         'cores_quantity': 24,
         'cores_frequency': 2200,
         'price': 1777,
-        'soket': 4677,
+        'socket': 4677,
         'ram_gen': 'DDR5',
     },
     {
         'manufacturer': 'intel',
         'name': 'Gold 6544',
         'cores_quantity': 16,
-        'cores_frequency': 3600,
+        'cores_frequency': 3650,
         'price': 5439,
-        'soket': 4677,
+        'socket': 4677,
         'ram_gen': 'ddr5',
     },
 ]
@@ -94,7 +94,7 @@ cpus_amd = [
     },
 ]
 
-server = [
+servers = [
     {
         'name': 'ASUS RS720 - E11 - RS12U',
         'cpu_vendor': 'intel',
