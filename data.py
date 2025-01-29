@@ -162,7 +162,7 @@ servers = [
 
 ]
 
-ram = [
+rams = [
     {
         'ram_gen': 'ddr4',
         'ram_size': 32,
