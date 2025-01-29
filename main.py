@@ -2,10 +2,10 @@ import math
 from data import cpus_intel, cpus_amd, rams, servers
 
 
-def requested_config(vcpu: int, vram: int, vssd: int, cpu_overcommit: int = 3, cpu_vendor: str = 'any',
-                     cpu_min_frequency: int = 0, max_cpu_usage: float = 0.8, max_ram_usage: float = 0.8):
+def requested_config(cpu_vendor: str = 'any', vcpu: int = 400, vram: int = 800, vssd: int = 20000,
+                     cpu_overcommit: int = 3, cpu_min_frequency: int = 0, max_cpu_usage: float = 0.8,
+                     max_ram_usage: float = 0.8):
     all_configs = {}
-    # i = 1
     match cpu_vendor:
         case 'any':
             for cpu in cpus_intel:
@@ -24,19 +24,16 @@ def requested_config(vcpu: int, vram: int, vssd: int, cpu_overcommit: int = 3, c
                     cpu_hosts = math.ceil(vcpu / cpu_overcommit / (cpu['cores_quantity'] * 2 * max_cpu_usage))
                     for server in servers:
                         if server['socket'] == cpu['socket']:
-                            rams_congigs = {}
                             for ram in rams:
-                                match server['ram_gen']:
-                                    case 'ddr4':
-                                        pass
-                                    case 'ddr5':
-                                        ram_host = math.ceil(vram / max_ram_usage / cpu_hosts / ram['ram_size'])
-                                        ram_1host = ram_host + 1 if ram_host % 2 == 1 else ram_host
-                                        if ram_1host>server['max_ram']:
-                                            continue
-                                        rams_congigs[ram['ram_size']] = ({'need for 1 host: ': ram_1host, 'cost: ': ram_1host*ram['price']})
-                                        all_configs[len(all_configs)] = {'Need hosts by CPU:': cpu_hosts, 'CPU:': cpu['name'],
-                                                  'Server: ': server['name'], ram['ram_size']: ram_1host}
+                                if server['ram_gen'] == ram['ram_gen']:
+                                    ram_host = math.ceil(vram / max_ram_usage / cpu_hosts / ram['ram_size'])
+                                    ram_1host = ram_host + 1 if ram_host % 2 == 1 else ram_host
+                                    if ram_1host > server['max_ram']:
+                                        continue
+                                    all_configs[len(all_configs)] = {'Need hosts by CPU:': cpu_hosts,
+                                                                     'CPU:': cpu['name'],
+                                                                     'Server: ': server['name'],
+                                                                     ram['ram_size']: ram_1host}
                         else:
                             continue
                 else:
