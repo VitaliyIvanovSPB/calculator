@@ -12,7 +12,8 @@ def get_cpus(vendor: str, min_frequency: int):
 
 def requested_config(cpu_vendor: str = 'any', vcpu: int = 400, vram: int = 800, vssd: int = 20000,
                      cpu_overcommit: int = 3, cpu_min_frequency: int = 0, max_cpu_usage: float = 0.8,
-                     max_ram_usage: float = 0.8, currency: int = 100):
+                     max_ram_usage: float = 0.8, currency: int = 100, payback_period: int = 24,
+                     coefficient: float = 3.3):
     """Подбирает конфигурации серверов по заданным параметрам"""
 
     all_configs = {}
@@ -28,18 +29,25 @@ def requested_config(cpu_vendor: str = 'any', vcpu: int = 400, vram: int = 800, 
 
                 if ram_1host > server['max_ram']:
                     continue
-                total_price = (cpu['price'] + server['price'] + ram_1host * ram['price'] + esxi_disc['price'] +
-                               network_card['price']) * (cpu_hosts+1)
 
-                all_configs[len(all_configs)] = {'Need hosts by CPU': cpu_hosts+1,
+                # total_price = (cpu['price'] + server['price'] + ram_1host * ram['price'] + esxi_disc['price'] +
+                #                network_card['price']) * (cpu_hosts + 1)
+
+                total_1host_price = cpu['price'] * 2 + server['price'] + ram_1host * ram['price'] + esxi_disc['price'] + network_card['price']
+                rms = total_1host_price * currency / payback_period * coefficient
+                vmware = rms * (cpu_hosts + 1)
+
+                all_configs[len(all_configs)] = {'Need hosts by CPU(n+1)': cpu_hosts + 1,
                                                  'CPU': cpu['name'] + ' ' + str(cpu['cores_frequency']) + 'GHz',
                                                  'Server': server['name'],
                                                  ram['ram_size']: ram_1host,
                                                  'Esxi disk': esxi_disc['type'],
                                                  'Network card': network_card['name'],
-                                                 'Total price': total_price}
-    sorted_configs = sorted(all_configs.items(), key=lambda x: x[1]['Total price'])[:5]
-    cheapest_config = min(all_configs.items(), key=lambda x: x[1]['Total price'])
+                                                 'rms, Rub': rms,
+                                                 'Total price, Rub': vmware}
+
+    sorted_configs = sorted(all_configs.items(), key=lambda x: x[1]['Total price, Rub'])[:5]
+    cheapest_config = min(all_configs.items(), key=lambda x: x[1]['Total price, Rub'])
     for index, (config_id, config) in enumerate(sorted_configs, 1):
         conf = [f"\nТоп {index}: Вариант {config_id}\n"]
         for key, value in config.items():
@@ -53,3 +61,6 @@ if __name__ == '__main__':
 
 # TODO:
 # вся логика пока только на интеле
+
+# итоговая цена за варю рмс на кол-во хостов
+# итоговая стоимость = сетевые услуги+варя+админка

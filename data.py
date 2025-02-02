@@ -243,7 +243,7 @@ servers = [
         'ram_gen': 'ddr4',
         'price': 7100,
     },
-{
+    {
         'name': 'ASUS RS700-E10-RS12U',
         'cpu_vendor': 'intel',
         'socket': 4189,
