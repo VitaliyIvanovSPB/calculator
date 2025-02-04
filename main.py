@@ -57,7 +57,7 @@ def requested_config(cpu_vendor: str = 'any', vcpu: int = 400, vram: int = 800, 
 
 
 if __name__ == '__main__':
-    print(requested_config(vcpu=2800, vram=10600, vssd=15000))
+    print(requested_config(vcpu=297, vram=804, vssd=31550, cpu_overcommit=2))
 
 # TODO:
 # вся логика пока только на интеле

@@ -259,14 +259,14 @@ servers = [
         'ram_gen': 'ddr5',
         'price': 4410,
     },
-    {
-        'name': 'ASUS RS700A-E11-RS4U 1U',
-        'cpu_vendor': 'amd',
-        'socket': 4094,
-        'max_ram': 32,
-        'ram_gen': 'ddr4',
-        'price': 2370,
-    },
+    # {
+    #     'name': 'ASUS RS700A-E11-RS4U 1U',
+    #     'cpu_vendor': 'amd',
+    #     'socket': 4094,
+    #     'max_ram': 32,
+    #     'ram_gen': 'ddr4',
+    #     'price': 2370,
+    # },
     {
         'name': 'ASUS RS700A-E12-RS12U',
         'cpu_vendor': 'amd',
@@ -434,6 +434,30 @@ servers = [
         'max_ram': 32,
         'ram_gen': 'ddr5',
         'price': 12000,
+    },
+    {
+        'name': 'X12DPI',
+        'cpu_vendor': 'intel',
+        'socket': 4189,
+        'max_ram': 16,
+        'ram_gen': 'ddr4',
+        'price': 2700,
+    },
+    {
+        'name': 'X11DPI',
+        'cpu_vendor': 'intel',
+        'socket': 3647,
+        'max_ram': 16,
+        'ram_gen': 'ddr4',
+        'price': 2700,
+    },
+    {
+        'name': 'H12DSI',
+        'cpu_vendor': 'amd',
+        'socket': 4094,
+        'max_ram': 16,
+        'ram_gen': 'ddr4',
+        'price': 2700,
     },
 ]
 
