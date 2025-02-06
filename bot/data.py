@@ -1,3 +1,10 @@
+max_cpu_usage = 0.8
+max_ram_usage = 0.8
+payback_period = 24
+coefficient = 3.3
+currency = 100
+switches = 100000
+switches_ipmi = 25000
 cpus = [
     {
         'manufacturer': 'amd',
@@ -179,24 +186,24 @@ cpus = [
         'socket': 4677,
         'ram_gen': 'DDR5',
     },
-    {
-        'manufacturer': 'intel',
-        'name': 'PLATINUM 8276 (28x2.2 GHz)',
-        'cores_quantity': 28,
-        'cores_frequency': 2200,
-        'price': 7427,
-        'socket': 3647,
-        'ram_gen': 'DDR4',
-    },
-    {
-        'manufacturer': 'intel',
-        'name': 'PLATINUM 8360H (24x3.0 GHz)',
-        'cores_quantity': 24,
-        'cores_frequency': 3000,
-        'price': 3214,
-        'socket': 4189,
-        'ram_gen': 'DDR5',
-    },
+    # {
+    #     'manufacturer': 'intel',
+    #     'name': 'PLATINUM 8276 (28x2.2 GHz)',
+    #     'cores_quantity': 28,
+    #     'cores_frequency': 2200,
+    #     'price': 7427,
+    #     'socket': 3647,
+    #     'ram_gen': 'DDR4',
+    # },
+    # {
+    #     'manufacturer': 'intel',
+    #     'name': 'PLATINUM 8360H (24x3.0 GHz)',
+    #     'cores_quantity': 24,
+    #     'cores_frequency': 3000,
+    #     'price': 3214,
+    #     'socket': 4189,
+    #     'ram_gen': 'DDR5',
+    # },
     {
         'manufacturer': 'intel',
         'name': 'Silver 4314 (16x2.4 GHz HT)',
@@ -232,7 +239,7 @@ servers = [
         'cpu_vendor': 'intel',
         'socket': 3647,
         'max_ram': 24,
-        'ram_gen': 'ddr4',
+        'ram_gen': 'DDR4',
         'price': 7409,
     },
     {
@@ -240,7 +247,7 @@ servers = [
         'cpu_vendor': 'amd',
         'socket': 4094,
         'max_ram': 32,
-        'ram_gen': 'ddr4',
+        'ram_gen': 'DDR4',
         'price': 7100,
     },
     {
@@ -248,7 +255,7 @@ servers = [
         'cpu_vendor': 'intel',
         'socket': 4189,
         'max_ram': 32,
-        'ram_gen': 'ddr4',
+        'ram_gen': 'DDR4',
         'price': 4000,
     },
     {
@@ -256,7 +263,7 @@ servers = [
         'cpu_vendor': 'intel',
         'socket': 4677,
         'max_ram': 32,
-        'ram_gen': 'ddr5',
+        'ram_gen': 'DDR5',
         'price': 4410,
     },
     # {
@@ -264,7 +271,7 @@ servers = [
     #     'cpu_vendor': 'amd',
     #     'socket': 4094,
     #     'max_ram': 32,
-    #     'ram_gen': 'ddr4',
+    #     'ram_gen': 'DDR4',
     #     'price': 2370,
     # },
     {
@@ -272,7 +279,7 @@ servers = [
         'cpu_vendor': 'amd',
         'socket': 6096,
         'max_ram': 24,
-        'ram_gen': 'ddr5',
+        'ram_gen': 'DDR5',
         'price': 5500,
     },
     {
@@ -280,7 +287,7 @@ servers = [
         'cpu_vendor': 'intel',
         'socket': 4677,
         'max_ram': 32,
-        'ram_gen': 'ddr5',
+        'ram_gen': 'DDR5',
         'price': 6525,
     },
     {
@@ -288,7 +295,7 @@ servers = [
         'cpu_vendor': 'intel',
         'socket': 4189,
         'max_ram': 32,
-        'ram_gen': 'ddr4',
+        'ram_gen': 'DDR4',
         'price': 6846,
     },
     {
@@ -296,7 +303,7 @@ servers = [
         'cpu_vendor': 'intel',
         'socket': 4677,
         'max_ram': 32,
-        'ram_gen': 'ddr5',
+        'ram_gen': 'DDR5',
         'price': 6425,
     },
     {
@@ -304,7 +311,7 @@ servers = [
         'cpu_vendor': 'amd',
         'socket': 4094,
         'max_ram': 32,
-        'ram_gen': 'ddr4',
+        'ram_gen': 'DDR4',
         'price': 6000,
     },
     {
@@ -312,7 +319,7 @@ servers = [
         'cpu_vendor': 'amd',
         'socket': 4094,
         'max_ram': 32,
-        'ram_gen': 'ddr4',
+        'ram_gen': 'DDR4',
         'price': 7000,
     },
     {
@@ -320,7 +327,7 @@ servers = [
         'cpu_vendor': 'amd',
         'socket': 6096,
         'max_ram': 24,
-        'ram_gen': 'ddr5',
+        'ram_gen': 'DDR5',
         'price': 6259,
     },
     {
@@ -328,7 +335,7 @@ servers = [
         'cpu_vendor': 'amd',
         'socket': 6096,
         'max_ram': 24,
-        'ram_gen': 'ddr5',
+        'ram_gen': 'DDR5',
         'price': 8285,
     },
     {
@@ -336,7 +343,7 @@ servers = [
         'cpu_vendor': 'intel',
         'socket': 4189,
         'max_ram': 32,
-        'ram_gen': 'ddr4',
+        'ram_gen': 'DDR4',
         'price': 2490,
     },
     {
@@ -344,55 +351,55 @@ servers = [
         'cpu_vendor': 'intel',
         'socket': 4189,
         'max_ram': 48,
-        'ram_gen': 'ddr4',
+        'ram_gen': 'DDR4',
         'price': 6850,
     },
-    {
-        'name': 'Inspur NF5280A6',
-        'cpu_vendor': 'amd',
-        'socket': 4094,
-        'max_ram': 32,
-        'ram_gen': 'ddr4',
-        'price': 5347,
-    },
-    {
-        'name': 'Inspur NF5280M5',
-        'cpu_vendor': 'intel',
-        'socket': 3647,
-        'max_ram': 24,
-        'ram_gen': 'ddr4',
-        'price': 5200,
-    },
-    {
-        'name': 'Inspur NF5280M6',
-        'cpu_vendor': 'intel',
-        'socket': 4189,
-        'max_ram': 32,
-        'ram_gen': 'ddr4',
-        'price': 6000,
-    },
-    {
-        'name': 'INTEL M50CYP1UR212',
-        'cpu_vendor': 'intel',
-        'socket': 4189,
-        'max_ram': 32,
-        'ram_gen': 'ddr4',
-        'price': 2320,
-    },
-    {
-        'name': 'INTEL M50CYP2UR312',
-        'cpu_vendor': 'intel',
-        'socket': 4189,
-        'max_ram': 32,
-        'ram_gen': 'ddr4',
-        'price': 2890,
-    },
+    # {
+    #     'name': 'Inspur NF5280A6',
+    #     'cpu_vendor': 'amd',
+    #     'socket': 4094,
+    #     'max_ram': 32,
+    #     'ram_gen': 'DDR4',
+    #     'price': 5347,
+    # },
+    # {
+    #     'name': 'Inspur NF5280M5',
+    #     'cpu_vendor': 'intel',
+    #     'socket': 3647,
+    #     'max_ram': 24,
+    #     'ram_gen': 'DDR4',
+    #     'price': 5200,
+    # },
+    # {
+    #     'name': 'Inspur NF5280M6',
+    #     'cpu_vendor': 'intel',
+    #     'socket': 4189,
+    #     'max_ram': 32,
+    #     'ram_gen': 'DDR4',
+    #     'price': 6000,
+    # },
+    # {
+    #     'name': 'INTEL M50CYP1UR212',
+    #     'cpu_vendor': 'intel',
+    #     'socket': 4189,
+    #     'max_ram': 32,
+    #     'ram_gen': 'DDR4',
+    #     'price': 2320,
+    # },
+    # {
+    #     'name': 'INTEL M50CYP2UR312',
+    #     'cpu_vendor': 'intel',
+    #     'socket': 4189,
+    #     'max_ram': 32,
+    #     'ram_gen': 'DDR4',
+    #     'price': 2890,
+    # },
     # {
     #     'name': 'INTEL R1208WFTZSR',
     #     'cpu_vendor': 'intel',
     #     'socket': 3647,
     #     'max_ram': 24,
-    #     'ram_gen': 'ddr4',
+    #     'ram_gen': 'DDR4',
     #     'price': 3805,
     # },
     # {
@@ -400,7 +407,7 @@ servers = [
     #     'cpu_vendor': 'intel',
     #     'socket': 3647,
     #     'max_ram': 24,
-    #     'ram_gen': 'ddr4',
+    #     'ram_gen': 'DDR4',
     #     'price': 1605,
     # },
     {
@@ -408,7 +415,7 @@ servers = [
         'cpu_vendor': 'intel',
         'socket': 4677,
         'max_ram': 32,
-        'ram_gen': 'ddr5',
+        'ram_gen': 'DDR5',
         'price': 8500,
     },
     {
@@ -416,7 +423,7 @@ servers = [
         'cpu_vendor': 'amd',
         'socket': 6096,
         'max_ram': 24,
-        'ram_gen': 'ddr5',
+        'ram_gen': 'DDR5',
         'price': 7000,
     },
     {
@@ -424,7 +431,7 @@ servers = [
         'cpu_vendor': 'intel',
         'socket': 3647,
         'max_ram': 24,
-        'ram_gen': 'ddr4',
+        'ram_gen': 'DDR4',
         'price': 7500,
     },
     {
@@ -432,7 +439,7 @@ servers = [
         'cpu_vendor': 'intel',
         'socket': 4677,
         'max_ram': 32,
-        'ram_gen': 'ddr5',
+        'ram_gen': 'DDR5',
         'price': 12000,
     },
     {
@@ -440,7 +447,7 @@ servers = [
         'cpu_vendor': 'intel',
         'socket': 4189,
         'max_ram': 16,
-        'ram_gen': 'ddr4',
+        'ram_gen': 'DDR4',
         'price': 2700,
     },
     {
@@ -448,7 +455,7 @@ servers = [
         'cpu_vendor': 'intel',
         'socket': 3647,
         'max_ram': 16,
-        'ram_gen': 'ddr4',
+        'ram_gen': 'DDR4',
         'price': 2700,
     },
     {
@@ -456,39 +463,39 @@ servers = [
         'cpu_vendor': 'amd',
         'socket': 4094,
         'max_ram': 16,
-        'ram_gen': 'ddr4',
+        'ram_gen': 'DDR4',
         'price': 2700,
     },
 ]
 
 rams = [
     {
-        'ram_gen': 'ddr4',
+        'ram_gen': 'DDR4',
         'ram_size': 32,
         'price': 120
     },
     {
-        'ram_gen': 'ddr4',
+        'ram_gen': 'DDR4',
         'ram_size': 64,
         'price': 245
     },
     {
-        'ram_gen': 'ddr4',
+        'ram_gen': 'DDR4',
         'ram_size': 128,
         'price': 684
     },
     {
-        'ram_gen': 'ddr5',
+        'ram_gen': 'DDR5',
         'ram_size': 32,
         'price': 137
     },
     {
-        'ram_gen': 'ddr5',
+        'ram_gen': 'DDR5',
         'ram_size': 64,
         'price': 280
     },
     {
-        'ram_gen': 'ddr5',
+        'ram_gen': 'DDR5',
         'ram_size': 128,
         'price': 1250
     },
@@ -525,6 +532,22 @@ hba_adapter = [
         'price': '$1100',
     }
 ]
+
+# Тип услуги \ Кол-во хостов	8	16	24	32	64	96	128
+works_base = 150000
+works_coefficient = {
+    'Нет': [0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00],
+    'vSphere': [1.00, 1.30, 1.60, 2.00, 2.50, 4.00, 5.00],
+    'DR': [1.30, 1.69, 2.08, 2.60, 3.25, 5.20, 6.50],
+    'Veeam': [0.33, 0.43, 0.53, 1.00, 1.25, 2.00, 2.50],
+    'ALB': [2.60, 3.20, 3.80, 4.60, 5.60, 8.60, 10.60],
+    'Tanzu': [0, 0, 0, 0, 0, 0, 0],
+    'VDI': [1.5, 1.9, 2.3, 2.7, 3.2, 4.5, 6.0],
+    'VDI public': [1.7, 2.1, 2.5, 2.9, 3.4, 4.7, 6.2],
+    'VDI GPU': [2.0, 2.4, 2.8, 3.2, 3.7, 5.0, 6.5],
+    'NSX': [1.00, 1.30, 1.60, 2.00, 2.50, 4.00, 5.00]
+
+}
 
 #
 # Диски
