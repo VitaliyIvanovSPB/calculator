@@ -5,6 +5,16 @@ coefficient = 3.3
 currency = 100
 switches = 100000
 switches_ipmi = 25000
+
+slack_space = 0.2
+raid_config = {
+    6: {'FTM': 'RAID-6', 'FTT': 2, 'disk_usage_overhead': 1.5},
+    5: {'FTM': 'RAID-5', 'FTT': 1, 'disk_usage_overhead': 1.33},
+    1: {'FTM': 'RAID-1', 'FTT': 1, 'disk_usage_overhead': 2},
+}
+
+
+
 cpus = [
     {
         'manufacturer': 'amd',

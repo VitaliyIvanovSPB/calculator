@@ -48,7 +48,8 @@ async def calculate(update: Update, context: ContextTypes.DEFAULT_TYPE):
     top5 = requested_config(vcpu=vcpu, vram=vram, vssd=vssd,
                             cpu_vendor=cpu_vendor, cpu_min_frequency=cpu_min_frequency, cpu_overcommit=cpu_overcommit,
                             works_main=works_main, works_add=works_add, network_card_qty=network_card_qty)
-    await context.bot.send_message(chat_id=update.effective_chat.id, text=''.join(top5))
+    await context.bot.send_message(chat_id=update.effective_chat.id, text=''.join(top5),
+                                   parse_mode=ParseMode.MARKDOWN)
 
 
 async def unknown(update: Update, context: ContextTypes.DEFAULT_TYPE):
