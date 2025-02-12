@@ -1,8 +1,8 @@
 import math
 
 from .data import (cpus, rams, servers, esxi_disc, network_card, works_base, works_coefficient, max_cpu_usage,
-                   max_ram_usage, payback_period, coefficient, currency, switches, switches_ipmi, slack_space,
-                   raid_config)
+                   max_ram_usage, payback_period, coefficient, currency, switches, switches_ipmi, raid_config, RAIDS,
+                   cache_disc, capacity_disks)
 
 
 def get_cpus(vendor: str, min_frequency: int):
@@ -48,7 +48,7 @@ def get_network_price(host_qty: int, network_card_qty: int):
 
 
 def requested_config(vcpu: int, vram: int, vssd: int, cpu_vendor: str, cpu_min_frequency: int, cpu_overcommit: int,
-                     works_main: str, works_add: str, network_card_qty: int):
+                     works_main: str, works_add: str, network_card_qty: int, slack_space, capacity_disk_type: str):
     all_configs = []
     cpu_list = get_cpus(cpu_vendor, cpu_min_frequency)
 
@@ -62,50 +62,65 @@ def requested_config(vcpu: int, vram: int, vssd: int, cpu_vendor: str, cpu_min_f
                 if ram_1host > server['max_ram']:
                     continue
 
-                # TODO:
-                # vsan
-                key = 6 if cpu_hosts >= 6 else (5 if cpu_hosts == 5 else 1)
+                cpu_hosts_n = cpu_hosts + 1
+
+                key = 6 if cpu_hosts_n >= 6 else (5 if cpu_hosts_n == 5 else 1)
                 config = raid_config[key]
                 vsan_raw = vssd * config['disk_usage_overhead'] / (1 - slack_space)
                 print(vsan_raw)
 
-                cpu_hosts_n = cpu_hosts + 1
-                host_price = (cpu['price'] * 2 + server['price'] + ram_1host * ram['price'] + esxi_disc['price'] +
-                              network_card['price'])
-                rms = math.ceil(host_price * currency / payback_period * coefficient)
-                vmware = rms * cpu_hosts_n
-                works = math.ceil(get_works_price(hosts_qty=cpu_hosts_n, main=works_main, additional=works_add))
-                network_price = math.ceil(get_network_price(host_qty=cpu_hosts_n,
-                                                            network_card_qty=network_card_qty))
-                total_price = vmware + works + network_price
+                for disk_size, values in RAIDS[key][slack_space].items():
+                    for sub_key, sub_value in values.items():
+                        if vsan_raw <= sub_value * cpu_hosts < vsan_raw * 1.2:
+                            print(
+                                f'Disk size - {disk_size}, '
+                                f'Disk group - {str(sub_key)[0]}, '
+                                f'Disk qty - {str(sub_key)[1]}: Available disk space - {sub_value * cpu_hosts}'
+                                f'Cache disc price = {cache_disc['price'] * int(str(sub_key)[0])}$'
+                                f'Capacity disk price = {capacity_disks[capacity_disk_type][disk_size]['price'] * int(str(sub_key)[1])}$')
+                            host_disks_price = (cache_disc['price'] * int(str(sub_key)[0]) +
+                                                capacity_disks[capacity_disk_type][disk_size]['price'] * int(
+                                        str(sub_key)[1]))
+                            host_price = (cpu['price'] * 2 + server['price'] + ram_1host * ram['price'] +
+                                          esxi_disc['price'] + network_card['price'] + host_disks_price)
+                            rms = math.ceil(host_price * currency / payback_period * coefficient)
+                            vmware = rms * cpu_hosts_n
+                            works = math.ceil(
+                                get_works_price(hosts_qty=cpu_hosts_n, main=works_main, additional=works_add))
+                            network_price = math.ceil(get_network_price(host_qty=cpu_hosts_n,
+                                                                        network_card_qty=network_card_qty))
+                            total_price = vmware + works + network_price
 
-                all_configs.append({
-                    'Need hosts by CPU(n+1)': cpu_hosts_n,
-                    'CPU overcommit': f'{cpu_overcommit}',
-                    'CPU': f'{cpu["name"]} - 2 шт',
-                    'Server': f'{server["name"]} - 1 шт',
-                    f'{ram["ram_size"]}Gb {ram["ram_gen"]}': f'{ram_1host} шт',
-                    'Esxi disk': f'{esxi_disc["type"]} - 1 шт',
-                    'Network card': f'{network_card["name"]} - {network_card_qty} шт',
-                    'Admin main works': works_main,
-                    'Additional works': works_add,
-                    'Works price': f'{works} руб.',
-                    'Network': f'{network_price} руб.',
-                    'vCPU available': f'{math.ceil((cpu["cores_quantity"] * 2 * cpu_hosts * cpu_overcommit * max_cpu_usage))}',
-                    'vRAM available': f'{math.ceil(ram_1host * ram["ram_size"] * cpu_hosts * max_ram_usage)}',
-                    '1 host rms, Rub': f'{rms} руб.',
-                    'Total price, Rub': f'{total_price} руб.', })
+                            all_configs.append({
+                                'Need hosts by CPU(n+1)': cpu_hosts_n,
+                                'CPU overcommit': f'{cpu_overcommit}',
+                                'CPU': f'{cpu["name"]} - 2 шт',
+                                'Server': f'{server["name"]} - 1 шт',
+                                f'{ram["ram_size"]}Gb {ram["ram_gen"]}': f'{ram_1host} шт',
+                                'Esxi disk': f'{esxi_disc["type"]} - 1 шт',
+                                'Cache disk': f'{cache_disc['size']} {cache_disc['type']} {cache_disc['vendor']} - {int(str(sub_key)[0])} шт',
+                                'Capacity disk': f'{disk_size} {capacity_disk_type} {capacity_disks[capacity_disk_type][disk_size]['name']} - {int(str(sub_key)[1])} шт',
+                                'Network card': f'{network_card["name"]} - {network_card_qty} шт',
+                                'Admin main works': works_main,
+                                'Additional works': works_add,
+                                'Works price': f'{works} руб.',
+                                'Network': f'{network_price} руб.',
+                                'vCPU available': f'{math.ceil((cpu["cores_quantity"] * 2 * cpu_hosts * cpu_overcommit * max_cpu_usage))}',
+                                'vRAM available': f'{math.ceil(ram_1host * ram["ram_size"] * cpu_hosts * max_ram_usage)}',
+                                'vSSD available': f'{sub_value * cpu_hosts}',
+                                '1 host rms, Rub': f'{rms} руб.',
+                                'Total price, Rub': f'{total_price} руб.', })
 
     sorted_configs = sorted(all_configs, key=lambda x: int(x['Total price, Rub'].split(' ')[0]))[:5]
 
     top5 = []
     for index, config in enumerate(sorted_configs, 1):
-        conf = [f'**\nТоп {index}:\n**']
+        conf = [f'\nТоп {index}:\n']
         for key, value in config.items():
             conf.append(f'{key}: {value}\n')
         # print(''.join(conf))
         top5.append(conf)
-    return [item for sublist in top5 for item in sublist]
+    return ''.join([item for sublist in top5 for item in sublist])
 
 
 if __name__ == '__main__':

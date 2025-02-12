@@ -8,12 +8,14 @@ from .calculator import requested_config
 text = f'Send me sizing:\n' \
        f'`/calculate vcpu=240 vram=480 vssd=12000`\n' \
        f'Options:\n' \
-       f'`cpu_vendor`(default=any)\n' \
-       f'`cpu_min_frequency`(default=0)\n' \
-       f'`cpu_overcommit`(default=3)\n' \
-       f'`works_main`(default=vSphere)\n' \
-       f'`works_add`(default=Нет)\n' \
-       f'`network_card_qty`(default=1)\n'
+       f'`cpu_vendor=`(default=any)\n' \
+       f'`cpu_min_frequency=`(default=0)\n' \
+       f'`cpu_overcommit=`(default=3)\n' \
+       f'`works_main=`(default=vSphere)\n' \
+       f'`works_add=`(default=Нет)\n' \
+       f'`network_card_qty=`(default=1)\n' \
+       f'`slack_space=`(default=0.2)\n'\
+       f'`capacity_disk_type=`(default=ssd)\n'
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -44,11 +46,14 @@ async def calculate(update: Update, context: ContextTypes.DEFAULT_TYPE):
     works_main = args.get('works_main', 'vSphere')
     works_add = args.get('works_add', 'Нет')
     network_card_qty = int(args.get('network_card_qty', 1))
+    slack_space = float(args.get('slack_space', 0.2))
+    capacity_disk_type = args.get('capacity_disk_type', 'ssd')
 
     top5 = requested_config(vcpu=vcpu, vram=vram, vssd=vssd,
                             cpu_vendor=cpu_vendor, cpu_min_frequency=cpu_min_frequency, cpu_overcommit=cpu_overcommit,
-                            works_main=works_main, works_add=works_add, network_card_qty=network_card_qty)
-    await context.bot.send_message(chat_id=update.effective_chat.id, text=''.join(top5),
+                            works_main=works_main, works_add=works_add, network_card_qty=network_card_qty,
+                            slack_space=slack_space, capacity_disk_type=capacity_disk_type)
+    await context.bot.send_message(chat_id=update.effective_chat.id, text=top5,
                                    parse_mode=ParseMode.MARKDOWN)
 
 
