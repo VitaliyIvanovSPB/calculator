@@ -681,17 +681,18 @@ network_card = {
     'price': 270,
 }
 
-hba_adapter = [
-    {
+hba_adapter = {
+    8: {
         'name': 'LSI9300-8i',
         'spec': 8,
-        'price': '$330',
-    }, {
+        'price': 330,
+    },
+    16: {
         'name': 'LSI9560-16i',
         'spec': 16,
-        'price': '$1100',
+        'price': 1100,
     }
-]
+}
 
 capacity_disks = {
     'ssd': {

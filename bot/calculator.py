@@ -2,7 +2,7 @@ import math
 
 from .data import (cpus, rams, servers, esxi_disc, network_card, works_base, works_coefficient, max_cpu_usage,
                    max_ram_usage, payback_period, coefficient, currency, switches, switches_ipmi, raid_config, RAIDS,
-                   cache_disc, capacity_disks)
+                   cache_disc, capacity_disks, hba_adapter)
 
 
 def get_cpus(vendor: str, min_frequency: int):
@@ -30,21 +30,28 @@ def get_switches_price(value: int, ports_qty: list):
 
 
 def get_network_price(host_qty: int, network_card_qty: int):
-    coefficients = [0.125, 0.25, 0.5, 1, 2, 3, 4]
-    ports_qty = [12, 24, 48, 96, 192, 288, 384]
+    coefficients = [0.125, 0.25, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 5]
+    ports_qty = [6, 12, 24, 48, 72, 96, 120, 144, 168, 192, 216]
+
+    coefficients_ipmi = [0.125, 0.25, 0.5, 1, 2, 3, 4]
     ports_ipmi_qty = [6, 12, 24, 48, 96, 144, 240]
 
     ports = host_qty * network_card_qty * 2
     network = next((coefficients[i] for i, limit in enumerate(ports_qty) if ports <= limit), -1)
     if network == -1:
-        return "Больше 4х"
+        return "Больше 5х"
 
     ports_ipmi = host_qty * network_card_qty
-    network_ipmi = next((coefficients[i] for i, limit in enumerate(ports_ipmi_qty) if ports_ipmi <= limit), -1)
+    network_ipmi = next((coefficients_ipmi[i] for i, limit in enumerate(ports_ipmi_qty) if ports_ipmi <= limit), -1)
     if network_ipmi == -1:
-        return "Больше 4х"
+        return "Больше 5х"
 
     return network * switches + network_ipmi * switches_ipmi
+
+
+def get_ram_in_host(cpu_hosts, ram, vram):
+    ram_host = math.ceil(vram / max_ram_usage / cpu_hosts / ram['ram_size'])
+    return ram_host + (ram_host % 2)
 
 
 def requested_config(vcpu: int, vram: int, vssd: int, cpu_vendor: str, cpu_min_frequency: int, cpu_overcommit: int,
@@ -57,32 +64,24 @@ def requested_config(vcpu: int, vram: int, vssd: int, cpu_vendor: str, cpu_min_f
 
         for server in filter(lambda s: s['socket'] == cpu['socket'], servers):
             for ram in filter(lambda r: r['ram_gen'] == server['ram_gen'], rams):
-                ram_host = math.ceil(vram / max_ram_usage / cpu_hosts / ram['ram_size'])
-                ram_1host = ram_host + (ram_host % 2)
+                ram_1host = get_ram_in_host(cpu_hosts, ram, vram)
                 if ram_1host > server['max_ram']:
                     continue
 
                 cpu_hosts_n = cpu_hosts + 1
-
                 key = 6 if cpu_hosts_n >= 6 else (5 if cpu_hosts_n == 5 else 1)
                 config = raid_config[key]
                 vsan_raw = vssd * config['disk_usage_overhead'] / (1 - slack_space)
-                print(vsan_raw)
 
                 for disk_size, values in RAIDS[key][slack_space].items():
                     for sub_key, sub_value in values.items():
                         if vsan_raw <= sub_value * cpu_hosts < vsan_raw * 1.2:
-                            print(
-                                f'Disk size - {disk_size}, '
-                                f'Disk group - {str(sub_key)[0]}, '
-                                f'Disk qty - {str(sub_key)[1]}: Available disk space - {sub_value * cpu_hosts}'
-                                f'Cache disc price = {cache_disc['price'] * int(str(sub_key)[0])}$'
-                                f'Capacity disk price = {capacity_disks[capacity_disk_type][disk_size]['price'] * int(str(sub_key)[1])}$')
-                            host_disks_price = (cache_disc['price'] * int(str(sub_key)[0]) +
-                                                capacity_disks[capacity_disk_type][disk_size]['price'] * int(
-                                        str(sub_key)[1]))
+                            host_cache_disks_price = cache_disc['price'] * int(str(sub_key)[0])
+                            host_capacity_disks_price = capacity_disks[capacity_disk_type][disk_size]['price'] * int(
+                                str(sub_key)[1]) * int(str(sub_key)[0])
                             host_price = (cpu['price'] * 2 + server['price'] + ram_1host * ram['price'] +
-                                          esxi_disc['price'] + network_card['price'] + host_disks_price)
+                                          esxi_disc['price'] + network_card['price'] +
+                                          host_cache_disks_price + host_capacity_disks_price + hba_adapter[8]['price'])
                             rms = math.ceil(host_price * currency / payback_period * coefficient)
                             vmware = rms * cpu_hosts_n
                             works = math.ceil(
@@ -101,6 +100,7 @@ def requested_config(vcpu: int, vram: int, vssd: int, cpu_vendor: str, cpu_min_f
                                 'Cache disk': f'{cache_disc['size']} {cache_disc['type']} {cache_disc['vendor']} - {int(str(sub_key)[0])} шт',
                                 'Capacity disk': f'{disk_size} {capacity_disk_type} {capacity_disks[capacity_disk_type][disk_size]['name']} - {int(str(sub_key)[1])} шт',
                                 'Network card': f'{network_card["name"]} - {network_card_qty} шт',
+                                'HBA adapter': f'{hba_adapter[8]["name"]}',
                                 'Admin main works': works_main,
                                 'Additional works': works_add,
                                 'Works price': f'{works} руб.',
@@ -118,7 +118,6 @@ def requested_config(vcpu: int, vram: int, vssd: int, cpu_vendor: str, cpu_min_f
         conf = [f'\nТоп {index}:\n']
         for key, value in config.items():
             conf.append(f'{key}: {value}\n')
-        # print(''.join(conf))
         top5.append(conf)
     return ''.join([item for sublist in top5 for item in sublist])
 
@@ -126,3 +125,6 @@ def requested_config(vcpu: int, vram: int, vssd: int, cpu_vendor: str, cpu_min_f
 if __name__ == '__main__':
     print(requested_config(vcpu=3900, vram=8000, vssd=2200, cpu_min_frequency=3000, cpu_overcommit=5, cpu_vendor='any',
                            network_card_qty=1, works_main='vSphere', works_add='Нет'))
+# TODO
+# Check max disks in server
+# fix HBA - auto select according disks qty
