@@ -666,14 +666,14 @@ rams = [
 
 esxi_disc = {
     'type': '512Gb sata/m2',
-    'price': 100
+    'price': 60
 }
 
 cache_disc = {
     'type': 'nvme',
     'size': '1.6-3.2Gb',
     'vendor': 'micron 7450',
-    'price': 350
+    'price': 300
 }
 
 network_card = {

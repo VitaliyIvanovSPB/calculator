@@ -54,6 +54,13 @@ def get_ram_in_host(cpu_hosts, ram, vram):
     return ram_host + (ram_host % 2)
 
 
+def get_vsan_disks_price(capacity_disk_type, disk_size, sub_key):
+    host_cache_disks_price = cache_disc['price'] * int(str(sub_key)[0])
+    host_capacity_disks_price = capacity_disks[capacity_disk_type][disk_size]['price'] * int(
+        str(sub_key)[1]) * int(str(sub_key)[0])
+    return host_cache_disks_price + host_capacity_disks_price
+
+
 def requested_config(vcpu: int, vram: int, vssd: int, cpu_vendor: str, cpu_min_frequency: int, cpu_overcommit: int,
                      works_main: str, works_add: str, network_card_qty: int, slack_space, capacity_disk_type: str):
     all_configs = []
@@ -72,16 +79,17 @@ def requested_config(vcpu: int, vram: int, vssd: int, cpu_vendor: str, cpu_min_f
                 key = 6 if cpu_hosts_n >= 6 else (5 if cpu_hosts_n == 5 else 1)
                 config = raid_config[key]
                 vsan_raw = vssd * config['disk_usage_overhead'] / (1 - slack_space)
-
                 for disk_size, values in RAIDS[key][slack_space].items():
-                    for sub_key, sub_value in values.items():
-                        if vsan_raw <= sub_value * cpu_hosts < vsan_raw * 1.2:
-                            host_cache_disks_price = cache_disc['price'] * int(str(sub_key)[0])
-                            host_capacity_disks_price = capacity_disks[capacity_disk_type][disk_size]['price'] * int(
-                                str(sub_key)[1]) * int(str(sub_key)[0])
+                    for disk_group, disks_capacity in values.items():
+                        if vssd <= disks_capacity * cpu_hosts < vsan_raw * 1.2:
+                            # TODO
+                            # Check max disks in server, add new parameter to data
+                            # fix HBA - auto select according disks qty
+
+                            vsan_disks_price = get_vsan_disks_price(capacity_disk_type, disk_size, disk_group)
                             host_price = (cpu['price'] * 2 + server['price'] + ram_1host * ram['price'] +
-                                          esxi_disc['price'] + network_card['price'] +
-                                          host_cache_disks_price + host_capacity_disks_price + hba_adapter[8]['price'])
+                                          esxi_disc['price'] + network_card['price'] + vsan_disks_price +
+                                          hba_adapter[8]['price'])
                             rms = math.ceil(host_price * currency / payback_period * coefficient)
                             vmware = rms * cpu_hosts_n
                             works = math.ceil(
@@ -97,8 +105,8 @@ def requested_config(vcpu: int, vram: int, vssd: int, cpu_vendor: str, cpu_min_f
                                 'Server': f'{server["name"]} - 1 шт',
                                 f'{ram["ram_size"]}Gb {ram["ram_gen"]}': f'{ram_1host} шт',
                                 'Esxi disk': f'{esxi_disc["type"]} - 1 шт',
-                                'Cache disk': f'{cache_disc['size']} {cache_disc['type']} {cache_disc['vendor']} - {int(str(sub_key)[0])} шт',
-                                'Capacity disk': f'{disk_size} {capacity_disk_type} {capacity_disks[capacity_disk_type][disk_size]['name']} - {int(str(sub_key)[1])} шт',
+                                'Cache disk': f'{cache_disc['size']} {cache_disc['type']} {cache_disc['vendor']} - {int(str(disk_group)[0])} шт',
+                                'Capacity disk': f'{disk_size} {capacity_disk_type} {capacity_disks[capacity_disk_type][disk_size]['name']} - {int(str(disk_group)[1])} шт',
                                 'Network card': f'{network_card["name"]} - {network_card_qty} шт',
                                 'HBA adapter': f'{hba_adapter[8]["name"]}',
                                 'Admin main works': works_main,
@@ -107,7 +115,7 @@ def requested_config(vcpu: int, vram: int, vssd: int, cpu_vendor: str, cpu_min_f
                                 'Network': f'{network_price} руб.',
                                 'vCPU available': f'{math.ceil((cpu["cores_quantity"] * 2 * cpu_hosts * cpu_overcommit * max_cpu_usage))}',
                                 'vRAM available': f'{math.ceil(ram_1host * ram["ram_size"] * cpu_hosts * max_ram_usage)}',
-                                'vSSD available': f'{sub_value * cpu_hosts}',
+                                'vSSD available': f'{disks_capacity * cpu_hosts}',
                                 '1 host rms, Rub': f'{rms} руб.',
                                 'Total price, Rub': f'{total_price} руб.', })
 
@@ -125,6 +133,3 @@ def requested_config(vcpu: int, vram: int, vssd: int, cpu_vendor: str, cpu_min_f
 if __name__ == '__main__':
     print(requested_config(vcpu=3900, vram=8000, vssd=2200, cpu_min_frequency=3000, cpu_overcommit=5, cpu_vendor='any',
                            network_card_qty=1, works_main='vSphere', works_add='Нет'))
-# TODO
-# Check max disks in server
-# fix HBA - auto select according disks qty
