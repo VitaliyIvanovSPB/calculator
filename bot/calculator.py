@@ -81,15 +81,14 @@ def requested_config(vcpu: int, vram: int, vssd: int, cpu_vendor: str, cpu_min_f
                 vsan_raw = vssd * config['disk_usage_overhead'] / (1 - slack_space)
                 for disk_size, disk_groups in RAIDS[key][slack_space].items():
                     for disk_group, disks_capacity in disk_groups.items():
-                        if (vssd <= disks_capacity * cpu_hosts < vsan_raw * 1.2 and
-                                int(str(disk_group)[0]) * int(str(disk_group)[1]) < server['max_disks_qty']):
-                            # TODO
-                            # fix HBA - auto select according disks qty
-
+                        host_disks_qty = int(str(disk_group)[0]) * int(str(disk_group)[1])
+                        if (vssd <= disks_capacity * cpu_hosts < vsan_raw * 1.2
+                                and host_disks_qty < server['max_disks_qty']):
+                            hba = hba_adapter[8] if host_disks_qty < 9 else hba_adapter[16]
                             vsan_disks_price = get_vsan_disks_price(capacity_disk_type, disk_size, disk_group)
                             host_price = (cpu['price'] * 2 + server['price'] + ram_1host * ram['price'] +
                                           esxi_disc['price'] + network_card['price'] + vsan_disks_price +
-                                          hba_adapter[8]['price'])
+                                          hba['price'])
                             rms = math.ceil(host_price * currency / payback_period * coefficient)
                             vmware = rms * cpu_hosts_n
                             works = math.ceil(
@@ -100,8 +99,8 @@ def requested_config(vcpu: int, vram: int, vssd: int, cpu_vendor: str, cpu_min_f
 
                             all_configs.append({
                                 'Need hosts by CPU(n+1)': cpu_hosts_n,
-                                'AllFlash vSAN':config['FTM'],
-                                'Failures to Tolerate':config['FTT'],
+                                'AllFlash vSAN': config['FTM'],
+                                'Failures to Tolerate': config['FTT'],
                                 'CPU overcommit': f'{cpu_overcommit}',
                                 'CPU': f'{cpu["name"]} - 2 шт',
                                 'Server': f'{server["name"]} - 1 шт',
@@ -110,7 +109,7 @@ def requested_config(vcpu: int, vram: int, vssd: int, cpu_vendor: str, cpu_min_f
                                 'Cache disk': f'{cache_disc['size']} {cache_disc['type']} {cache_disc['vendor']} - {int(str(disk_group)[0])} шт',
                                 'Capacity disk': f'{disk_size} {capacity_disk_type} {capacity_disks[capacity_disk_type][disk_size]['name']} - {int(str(disk_group)[1])} шт',
                                 'Network card': f'{network_card["name"]} - {network_card_qty} шт',
-                                'HBA adapter': f'{hba_adapter[8]["name"]}',
+                                'HBA adapter': f'{hba["name"]} - 1 шт',
                                 'Admin main works': works_main,
                                 'Additional works': works_add,
                                 'Works price': f'{works} руб.',
