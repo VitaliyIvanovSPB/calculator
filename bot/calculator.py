@@ -54,10 +54,10 @@ def get_ram_in_host(cpu_hosts, ram, vram):
     return ram_host + (ram_host % 2)
 
 
-def get_vsan_disks_price(capacity_disk_type, disk_size, sub_key):
-    host_cache_disks_price = cache_disc['price'] * int(str(sub_key)[0])
+def get_vsan_disks_price(capacity_disk_type, disk_size, disks_qty):
+    host_cache_disks_price = cache_disc['price'] * int(str(disks_qty)[0])
     host_capacity_disks_price = capacity_disks[capacity_disk_type][disk_size]['price'] * int(
-        str(sub_key)[1]) * int(str(sub_key)[0])
+        str(disks_qty)[1]) * int(str(disks_qty)[0])
     return host_cache_disks_price + host_capacity_disks_price
 
 
@@ -79,11 +79,11 @@ def requested_config(vcpu: int, vram: int, vssd: int, cpu_vendor: str, cpu_min_f
                 key = 6 if cpu_hosts_n >= 6 else (5 if cpu_hosts_n == 5 else 1)
                 config = raid_config[key]
                 vsan_raw = vssd * config['disk_usage_overhead'] / (1 - slack_space)
-                for disk_size, values in RAIDS[key][slack_space].items():
-                    for disk_group, disks_capacity in values.items():
-                        if vssd <= disks_capacity * cpu_hosts < vsan_raw * 1.2:
+                for disk_size, disk_groups in RAIDS[key][slack_space].items():
+                    for disk_group, disks_capacity in disk_groups.items():
+                        if (vssd <= disks_capacity * cpu_hosts < vsan_raw * 1.2 and
+                                int(str(disk_group)[0]) * int(str(disk_group)[1]) < server['max_disks_qty']):
                             # TODO
-                            # Check max disks in server, add new parameter to data
                             # fix HBA - auto select according disks qty
 
                             vsan_disks_price = get_vsan_disks_price(capacity_disk_type, disk_size, disk_group)
@@ -100,6 +100,8 @@ def requested_config(vcpu: int, vram: int, vssd: int, cpu_vendor: str, cpu_min_f
 
                             all_configs.append({
                                 'Need hosts by CPU(n+1)': cpu_hosts_n,
+                                'AllFlash vSAN':config['FTM'],
+                                'Failures to Tolerate':config['FTT'],
                                 'CPU overcommit': f'{cpu_overcommit}',
                                 'CPU': f'{cpu["name"]} - 2 шт',
                                 'Server': f'{server["name"]} - 1 шт',

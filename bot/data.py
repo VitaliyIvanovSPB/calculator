@@ -10,16 +10,16 @@ switches_ipmi = 25000
 works_base = 150000
 # Тип услуги \ Кол-во хостов	8	16	24	32	64	96	128
 works_coefficient = {
-    'Нет': [0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00],
-    'vSphere': [1.00, 1.30, 1.60, 2.00, 2.50, 4.00, 5.00],
-    'DR': [1.30, 1.69, 2.08, 2.60, 3.25, 5.20, 6.50],
-    'Veeam': [0.33, 0.43, 0.53, 1.00, 1.25, 2.00, 2.50],
-    'ALB': [2.60, 3.20, 3.80, 4.60, 5.60, 8.60, 10.60],
-    'Tanzu': [0, 0, 0, 0, 0, 0, 0],
-    'VDI': [1.5, 1.9, 2.3, 2.7, 3.2, 4.5, 6.0],
-    'VDI public': [1.7, 2.1, 2.5, 2.9, 3.4, 4.7, 6.2],
-    'VDI GPU': [2.0, 2.4, 2.8, 3.2, 3.7, 5.0, 6.5],
-    'NSX': [1.00, 1.30, 1.60, 2.00, 2.50, 4.00, 5.00]
+    'нет': [0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00],
+    'vsphere': [1.00, 1.30, 1.60, 2.00, 2.50, 4.00, 5.00],
+    'dr': [1.30, 1.69, 2.08, 2.60, 3.25, 5.20, 6.50],
+    'veeam': [0.33, 0.43, 0.53, 1.00, 1.25, 2.00, 2.50],
+    'alb': [2.60, 3.20, 3.80, 4.60, 5.60, 8.60, 10.60],
+    'tanzu': [0, 0, 0, 0, 0, 0, 0],
+    'vdi': [1.5, 1.9, 2.3, 2.7, 3.2, 4.5, 6.0],
+    'vdi public': [1.7, 2.1, 2.5, 2.9, 3.4, 4.7, 6.2],
+    'vdi gpu': [2.0, 2.4, 2.8, 3.2, 3.7, 5.0, 6.5],
+    'nsx': [1.00, 1.30, 1.60, 2.00, 2.50, 4.00, 5.00]
 
 }
 
@@ -402,6 +402,7 @@ servers = [
         'socket': 3647,
         'max_ram': 24,
         'ram_gen': 'DDR4',
+        'max_disks_qty':8,
         'price': 7409,
     },
     {
@@ -410,6 +411,7 @@ servers = [
         'socket': 4094,
         'max_ram': 32,
         'ram_gen': 'DDR4',
+        'max_disks_qty':8,
         'price': 7100,
     },
     {
@@ -418,6 +420,7 @@ servers = [
         'socket': 4189,
         'max_ram': 32,
         'ram_gen': 'DDR4',
+        'max_disks_qty':12,
         'price': 4000,
     },
     {
@@ -426,22 +429,25 @@ servers = [
         'socket': 4677,
         'max_ram': 32,
         'ram_gen': 'DDR5',
+        'max_disks_qty':12,
         'price': 4410,
     },
-    # {
-    #     'name': 'ASUS RS700A-E11-RS4U 1U',
-    #     'cpu_vendor': 'amd',
-    #     'socket': 4094,
-    #     'max_ram': 32,
-    #     'ram_gen': 'DDR4',
-    #     'price': 2370,
-    # },
+    {
+        'name': 'ASUS RS700A-E11-RS4U 1U',
+        'cpu_vendor': 'amd',
+        'socket': 4094,
+        'max_ram': 32,
+        'ram_gen': 'DDR4',
+        'max_disks_qty':4,
+        'price': 2370,
+    },
     {
         'name': 'ASUS RS700A-E12-RS12U',
         'cpu_vendor': 'amd',
         'socket': 6096,
         'max_ram': 24,
         'ram_gen': 'DDR5',
+        'max_disks_qty':12,
         'price': 5500,
     },
     {
@@ -450,6 +456,7 @@ servers = [
         'socket': 4677,
         'max_ram': 32,
         'ram_gen': 'DDR5',
+        'max_disks_qty':24,
         'price': 6525,
     },
     {
@@ -458,6 +465,7 @@ servers = [
         'socket': 4189,
         'max_ram': 32,
         'ram_gen': 'DDR4',
+        'max_disks_qty':24,
         'price': 6846,
     },
     {
@@ -466,6 +474,7 @@ servers = [
         'socket': 4677,
         'max_ram': 32,
         'ram_gen': 'DDR5',
+        'max_disks_qty':12,
         'price': 6425,
     },
     {
@@ -474,6 +483,7 @@ servers = [
         'socket': 4094,
         'max_ram': 32,
         'ram_gen': 'DDR4',
+        'max_disks_qty':12,
         'price': 6000,
     },
     {
@@ -482,6 +492,7 @@ servers = [
         'socket': 4094,
         'max_ram': 32,
         'ram_gen': 'DDR4',
+        'max_disks_qty':24,
         'price': 7000,
     },
     {
@@ -490,6 +501,7 @@ servers = [
         'socket': 6096,
         'max_ram': 24,
         'ram_gen': 'DDR5',
+        'max_disks_qty':12,
         'price': 6259,
     },
     {
@@ -498,6 +510,7 @@ servers = [
         'socket': 6096,
         'max_ram': 24,
         'ram_gen': 'DDR5',
+        'max_disks_qty':24,
         'price': 8285,
     },
     {
@@ -506,6 +519,7 @@ servers = [
         'socket': 4189,
         'max_ram': 32,
         'ram_gen': 'DDR4',
+        'max_disks_qty':12,
         'price': 2490,
     },
     {
@@ -514,6 +528,7 @@ servers = [
         'socket': 4189,
         'max_ram': 48,
         'ram_gen': 'DDR4',
+        'max_disks_qty':10,
         'price': 6850,
     },
     # {
@@ -578,6 +593,7 @@ servers = [
         'socket': 4677,
         'max_ram': 32,
         'ram_gen': 'DDR5',
+        'max_disks_qty':8,
         'price': 8500,
     },
     {
@@ -586,6 +602,7 @@ servers = [
         'socket': 6096,
         'max_ram': 24,
         'ram_gen': 'DDR5',
+        'max_disks_qty':8,
         'price': 7000,
     },
     {
@@ -594,15 +611,8 @@ servers = [
         'socket': 3647,
         'max_ram': 24,
         'ram_gen': 'DDR4',
+        'max_disks_qty':24,
         'price': 7500,
-    },
-    {
-        'name': 'SUPERMICRO SYS-221H-TN24R',
-        'cpu_vendor': 'intel',
-        'socket': 4677,
-        'max_ram': 32,
-        'ram_gen': 'DDR5',
-        'price': 12000,
     },
     {
         'name': 'X12DPI',
@@ -610,6 +620,7 @@ servers = [
         'socket': 4189,
         'max_ram': 16,
         'ram_gen': 'DDR4',
+        'max_disks_qty':12,
         'price': 2700,
     },
     {
@@ -618,6 +629,7 @@ servers = [
         'socket': 3647,
         'max_ram': 16,
         'ram_gen': 'DDR4',
+        'max_disks_qty':12,
         'price': 2700,
     },
     {
@@ -626,6 +638,7 @@ servers = [
         'socket': 4094,
         'max_ram': 16,
         'ram_gen': 'DDR4',
+        'max_disks_qty':12,
         'price': 2700,
     },
 ]
