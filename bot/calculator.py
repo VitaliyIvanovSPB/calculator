@@ -64,13 +64,16 @@ def get_vsan_disks_price(capacity_disk_type, disk_size, disks_qty):
 def requested_config(vcpu: int, vram: int, vssd: int, cpu_vendor: str, cpu_min_frequency: int, cpu_overcommit: int,
                      works_main: str, works_add: str, network_card_qty: int, slack_space, capacity_disk_type: str):
     all_configs = []
-    cpu_list = get_cpus(cpu_vendor, cpu_min_frequency)
-
-    for cpu in cpu_list:
+    # cpu_list = get_cpus(cpu_vendor, cpu_min_frequency)
+    filtered_cpu_list = [cpu for cpu in cpus if (cpu_vendor == 'any' or cpu['manufacturer'] == cpu_vendor) and cpu[
+        'cores_frequency'] >= cpu_min_frequency]
+    for cpu in filtered_cpu_list:
         cpu_hosts = math.ceil(vcpu / cpu_overcommit / (cpu['cores_quantity'] * 2 * max_cpu_usage))
+        filtered_servers = [s for s in servers if s['socket'] == cpu['socket']]
 
-        for server in filter(lambda s: s['socket'] == cpu['socket'], servers):
-            for ram in filter(lambda r: r['ram_gen'] == server['ram_gen'], rams):
+        for server in filtered_servers:
+            filtered_rams = [r for r in rams if r['ram_gen'] == server['ram_gen']]
+            for ram in filtered_rams:
                 ram_1host = get_ram_in_host(cpu_hosts, ram, vram)
                 if ram_1host > server['max_ram']:
                     continue
