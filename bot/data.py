@@ -2,7 +2,6 @@ max_cpu_usage = 0.8
 max_ram_usage = 0.8
 payback_period = 24
 coefficient = 3.3
-currency = 100
 switches = 100000
 switches_ipmi = 25000
 
@@ -686,7 +685,7 @@ cache_disc = {
     'type': 'nvme',
     'size': '1.6-3.2Gb',
     'vendor': 'micron 7450',
-    'price': 300
+    'price': 350
 }
 
 network_card = {
@@ -727,7 +726,7 @@ capacity_disks = {
         },
         15360: {
             'name': 'Micron 7400 PRO',
-            'price': 2000
+            'price': 2600
         },
     },
     'nvme': {

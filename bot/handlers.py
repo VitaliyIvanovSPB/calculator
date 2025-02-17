@@ -1,9 +1,12 @@
+import math
+
 import telegram.ext as tg_ext
 
 from telegram.ext import filters, MessageHandler, CommandHandler, ContextTypes
 from telegram import Update
 from telegram.constants import ParseMode
 from .calculator import requested_config
+from .cbr import get_cbr_currency_rate
 
 text = f'Send me sizing:\n' \
        f'`/calculate vcpu=240 vram=480 vssd=12000`\n' \
@@ -16,7 +19,8 @@ text = f'Send me sizing:\n' \
        f'(нет, vsphere, dr ,veeam, alb, tanzu, vdi, vdi public, vdi gpu, nsx)' \
        f'`network_card_qty=`(default=1)\n' \
        f'`slack_space=`(default=0.2)\n' \
-       f'`capacity_disk_type=`(default=ssd)\n'
+       f'`capacity_disk_type=`(default=ssd)\n' \
+       f'`currency=`(default=cbr or 100)\n'
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -49,11 +53,14 @@ async def calculate(update: Update, context: ContextTypes.DEFAULT_TYPE):
     network_card_qty = int(args.get('network_card_qty', 1))
     slack_space = float(args.get('slack_space', 0.2))
     capacity_disk_type = args.get('capacity_disk_type', 'ssd')
+    usd = get_cbr_currency_rate()
+    currency = int(args.get('currency', math.ceil(usd) if usd else 100))
 
     top5 = requested_config(vcpu=vcpu, vram=vram, vssd=vssd,
                             cpu_vendor=cpu_vendor, cpu_min_frequency=cpu_min_frequency, cpu_overcommit=cpu_overcommit,
-                            works_main=works_main.lower(), works_add=works_add.lower(), network_card_qty=network_card_qty,
-                            slack_space=slack_space, capacity_disk_type=capacity_disk_type.lower())
+                            works_main=works_main.lower(), works_add=works_add.lower(),
+                            network_card_qty=network_card_qty,
+                            slack_space=slack_space, capacity_disk_type=capacity_disk_type.lower(), currency=currency)
     await context.bot.send_message(chat_id=update.effective_chat.id, text=top5,
                                    parse_mode=ParseMode.MARKDOWN)
 

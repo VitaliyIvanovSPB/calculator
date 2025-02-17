@@ -1,7 +1,7 @@
 import math
 
 from .data import (cpus, rams, servers, esxi_disc, network_card, works_base, works_coefficient, max_cpu_usage,
-                   max_ram_usage, payback_period, coefficient, currency, switches, switches_ipmi, raid_config, RAIDS,
+                   max_ram_usage, payback_period, coefficient, switches, switches_ipmi, raid_config, RAIDS,
                    cache_disc, capacity_disks, hba_adapter)
 
 
@@ -54,7 +54,7 @@ def get_vsan_disks_price(capacity_disk_type, disk_size, disks_qty):
 
 
 def create_config(all_configs, capacity_disk_type, cpu, cpu_hosts, cpu_overcommit, network_card_qty, ram, ram_1host,
-                  server, slack_space, vssd, works_add, works_main):
+                  server, slack_space, vssd, works_add, works_main, currency):
     cpu_hosts_n = cpu_hosts + 1
     key = 6 if cpu_hosts_n >= 6 else (5 if cpu_hosts_n == 5 else 1)
     config = raid_config[key]
@@ -85,14 +85,14 @@ def create_config(all_configs, capacity_disk_type, cpu, cpu_hosts, cpu_overcommi
                     'AllFlash vSAN': config['FTM'],
                     'Failures to Tolerate': config['FTT'],
                     'CPU overcommit': f'{cpu_overcommit}',
-                    'CPU': f'{cpu["name"]} - 2 шт',
-                    'Server': f'{server["name"]} - 1 шт',
-                    f'{ram["ram_size"]}Gb {ram["ram_gen"]}': f'{ram_1host} шт',
-                    'Esxi disk': f'{esxi_disc["type"]} - 1 шт',
-                    'Cache disk': f'{cache_disc['size']} {cache_disc['type']} {cache_disc['vendor']} - {int(str(disk_group)[0])} шт',
-                    'Capacity disk': f'{disk_size} {capacity_disk_type} {capacity_disks[capacity_disk_type][disk_size]['name']} - {int(str(disk_group)[1])} шт',
-                    'Network card': f'{network_card["name"]} - {network_card_qty} шт',
-                    'HBA adapter': f'{hba["name"]} - 1 шт',
+                    'CPU': f'{cpu["name"]} {cpu["price"]} - 2 шт',
+                    'Server': f'{server["name"]} {server["price"]} - 1 шт',
+                    f'{ram["ram_size"]}Gb {ram["ram_gen"]} {ram["price"]}': f'{ram_1host} шт',
+                    'Esxi disk': f'{esxi_disc["type"]} {esxi_disc["price"]} - 1 шт',
+                    'Cache disk': f'{cache_disc['size']} {cache_disc['type']} {cache_disc['vendor']} {cache_disc['price']} - {int(str(disk_group)[0])} шт',
+                    'Capacity disk': f'{disk_size} {capacity_disk_type} {capacity_disks[capacity_disk_type][disk_size]['name']} {capacity_disks[capacity_disk_type][disk_size]['price']} - {int(str(disk_group)[1])} шт',
+                    'Network card': f'{network_card["name"]} {network_card["price"]} - {network_card_qty} шт',
+                    'HBA adapter': f'{hba["name"]} {hba["price"]} - 1 шт',
                     'Admin main works': works_main,
                     'Additional works': works_add,
                     'Works price': f'{works} руб.',
@@ -101,7 +101,9 @@ def create_config(all_configs, capacity_disk_type, cpu, cpu_hosts, cpu_overcommi
                     'vRAM available': f'{math.ceil(ram_1host * ram["ram_size"] * cpu_hosts * max_ram_usage)}',
                     'vSSD available': f'{disks_capacity * cpu_hosts}',
                     '1 host rms, Rub': f'{rms} руб.',
-                    'Total price, Rub': f'{total_price} руб.', })
+                    'Total price, Rub': f'{total_price} руб.',
+                    'USD/RUB': f'{currency} руб.',
+                })
 
 
 def format_top_configs(sorted_configs):
@@ -115,7 +117,8 @@ def format_top_configs(sorted_configs):
 
 
 def requested_config(vcpu: int, vram: int, vssd: int, cpu_vendor: str, cpu_min_frequency: int, cpu_overcommit: int,
-                     works_main: str, works_add: str, network_card_qty: int, slack_space, capacity_disk_type: str):
+                     works_main: str, works_add: str, network_card_qty: int, slack_space, capacity_disk_type: str,
+                     currency: int):
     all_configs = []
     filtered_cpu_list = [cpu for cpu in cpus if (cpu_vendor == 'any' or cpu['manufacturer'] == cpu_vendor) and cpu[
         'cores_frequency'] >= cpu_min_frequency]
@@ -130,7 +133,7 @@ def requested_config(vcpu: int, vram: int, vssd: int, cpu_vendor: str, cpu_min_f
                     continue
 
                 create_config(all_configs, capacity_disk_type, cpu, cpu_hosts, cpu_overcommit, network_card_qty, ram,
-                              ram_1host, server, slack_space, vssd, works_add, works_main)
+                              ram_1host, server, slack_space, vssd, works_add, works_main, currency)
 
     sorted_configs = sorted(all_configs, key=lambda x: int(x['Total price, Rub'].split(' ')[0]))[:5]
 
@@ -139,4 +142,5 @@ def requested_config(vcpu: int, vram: int, vssd: int, cpu_vendor: str, cpu_min_f
 
 if __name__ == '__main__':
     print(requested_config(vcpu=3900, vram=8000, vssd=2200, cpu_min_frequency=3000, cpu_overcommit=5, cpu_vendor='any',
-                           network_card_qty=1, works_main='vSphere', works_add='Нет'))
+                           network_card_qty=1, works_main='vSphere', works_add='Нет', slack_space=0.2,
+                           capacity_disk_type='nvme'))
