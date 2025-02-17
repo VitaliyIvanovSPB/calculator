@@ -70,7 +70,7 @@ def create_config(all_configs, capacity_disk_type, cpu, cpu_hosts, cpu_overcommi
                 hba = hba_adapter[8] if host_disks_qty < 9 else hba_adapter[16]
                 vsan_disks_price = get_vsan_disks_price(capacity_disk_type, disk_size, disk_group)
                 host_price = (cpu['price'] * 2 + server['price'] + ram_1host * ram['price'] +
-                              esxi_disc['price'] + network_card['price'] + vsan_disks_price +
+                              esxi_disc[capacity_disk_type]['price'] + network_card['price'] + vsan_disks_price +
                               hba['price'])
                 rms = math.ceil(host_price * currency / payback_period * coefficient)
                 vmware = rms * cpu_hosts_n
@@ -88,7 +88,7 @@ def create_config(all_configs, capacity_disk_type, cpu, cpu_hosts, cpu_overcommi
                     'CPU': f'{cpu["name"]} {cpu["price"]} - 2 шт',
                     'Server': f'{server["name"]} {server["price"]} - 1 шт',
                     f'{ram["ram_size"]}Gb {ram["ram_gen"]} {ram["price"]}': f'{ram_1host} шт',
-                    'Esxi disk': f'{esxi_disc["type"]} {esxi_disc["price"]} - 1 шт',
+                    'Esxi disk': f'{esxi_disc[capacity_disk_type]["type"]} {esxi_disc[capacity_disk_type]["price"]} - 1 шт',
                     'Cache disk': f'{cache_disc['size']} {cache_disc['type']} {cache_disc['vendor']} {cache_disc['price']} - {int(str(disk_group)[0])} шт',
                     'Capacity disk': f'{disk_size} {capacity_disk_type} {capacity_disks[capacity_disk_type][disk_size]['name']} {capacity_disks[capacity_disk_type][disk_size]['price']} - {int(str(disk_group)[1])} шт',
                     'Network card': f'{network_card["name"]} {network_card["price"]} - {network_card_qty} шт',

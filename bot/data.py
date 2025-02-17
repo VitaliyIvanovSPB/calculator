@@ -401,7 +401,7 @@ servers = [
         'socket': 3647,
         'max_ram': 24,
         'ram_gen': 'DDR4',
-        'max_disks_qty':8,
+        'max_disks_qty': 8,
         'price': 7409,
     },
     {
@@ -410,7 +410,7 @@ servers = [
         'socket': 4094,
         'max_ram': 32,
         'ram_gen': 'DDR4',
-        'max_disks_qty':8,
+        'max_disks_qty': 8,
         'price': 7100,
     },
     {
@@ -419,7 +419,7 @@ servers = [
         'socket': 4189,
         'max_ram': 32,
         'ram_gen': 'DDR4',
-        'max_disks_qty':12,
+        'max_disks_qty': 12,
         'price': 4000,
     },
     {
@@ -428,7 +428,7 @@ servers = [
         'socket': 4677,
         'max_ram': 32,
         'ram_gen': 'DDR5',
-        'max_disks_qty':12,
+        'max_disks_qty': 12,
         'price': 4410,
     },
     {
@@ -437,7 +437,7 @@ servers = [
         'socket': 4094,
         'max_ram': 32,
         'ram_gen': 'DDR4',
-        'max_disks_qty':4,
+        'max_disks_qty': 4,
         'price': 2370,
     },
     {
@@ -446,7 +446,7 @@ servers = [
         'socket': 6096,
         'max_ram': 24,
         'ram_gen': 'DDR5',
-        'max_disks_qty':12,
+        'max_disks_qty': 12,
         'price': 5500,
     },
     {
@@ -455,7 +455,7 @@ servers = [
         'socket': 4677,
         'max_ram': 32,
         'ram_gen': 'DDR5',
-        'max_disks_qty':24,
+        'max_disks_qty': 24,
         'price': 6525,
     },
     {
@@ -464,7 +464,7 @@ servers = [
         'socket': 4189,
         'max_ram': 32,
         'ram_gen': 'DDR4',
-        'max_disks_qty':24,
+        'max_disks_qty': 24,
         'price': 6846,
     },
     {
@@ -473,7 +473,7 @@ servers = [
         'socket': 4677,
         'max_ram': 32,
         'ram_gen': 'DDR5',
-        'max_disks_qty':12,
+        'max_disks_qty': 12,
         'price': 6425,
     },
     {
@@ -482,7 +482,7 @@ servers = [
         'socket': 4094,
         'max_ram': 32,
         'ram_gen': 'DDR4',
-        'max_disks_qty':12,
+        'max_disks_qty': 12,
         'price': 6000,
     },
     {
@@ -491,7 +491,7 @@ servers = [
         'socket': 4094,
         'max_ram': 32,
         'ram_gen': 'DDR4',
-        'max_disks_qty':24,
+        'max_disks_qty': 24,
         'price': 7000,
     },
     {
@@ -500,7 +500,7 @@ servers = [
         'socket': 6096,
         'max_ram': 24,
         'ram_gen': 'DDR5',
-        'max_disks_qty':12,
+        'max_disks_qty': 12,
         'price': 6259,
     },
     {
@@ -509,7 +509,7 @@ servers = [
         'socket': 6096,
         'max_ram': 24,
         'ram_gen': 'DDR5',
-        'max_disks_qty':24,
+        'max_disks_qty': 24,
         'price': 8285,
     },
     {
@@ -518,7 +518,7 @@ servers = [
         'socket': 4189,
         'max_ram': 32,
         'ram_gen': 'DDR4',
-        'max_disks_qty':12,
+        'max_disks_qty': 12,
         'price': 2490,
     },
     {
@@ -527,7 +527,7 @@ servers = [
         'socket': 4189,
         'max_ram': 48,
         'ram_gen': 'DDR4',
-        'max_disks_qty':10,
+        'max_disks_qty': 10,
         'price': 6850,
     },
     # {
@@ -592,7 +592,7 @@ servers = [
         'socket': 4677,
         'max_ram': 32,
         'ram_gen': 'DDR5',
-        'max_disks_qty':8,
+        'max_disks_qty': 8,
         'price': 8500,
     },
     {
@@ -601,7 +601,7 @@ servers = [
         'socket': 6096,
         'max_ram': 24,
         'ram_gen': 'DDR5',
-        'max_disks_qty':8,
+        'max_disks_qty': 8,
         'price': 7000,
     },
     {
@@ -610,7 +610,7 @@ servers = [
         'socket': 3647,
         'max_ram': 24,
         'ram_gen': 'DDR4',
-        'max_disks_qty':24,
+        'max_disks_qty': 24,
         'price': 7500,
     },
     {
@@ -619,7 +619,7 @@ servers = [
         'socket': 4189,
         'max_ram': 16,
         'ram_gen': 'DDR4',
-        'max_disks_qty':12,
+        'max_disks_qty': 12,
         'price': 2700,
     },
     {
@@ -628,7 +628,7 @@ servers = [
         'socket': 3647,
         'max_ram': 16,
         'ram_gen': 'DDR4',
-        'max_disks_qty':12,
+        'max_disks_qty': 12,
         'price': 2700,
     },
     {
@@ -637,7 +637,7 @@ servers = [
         'socket': 4094,
         'max_ram': 16,
         'ram_gen': 'DDR4',
-        'max_disks_qty':12,
+        'max_disks_qty': 12,
         'price': 2700,
     },
 ]
@@ -677,8 +677,15 @@ rams = [
 ]
 
 esxi_disc = {
-    'type': '512Gb sata/m2',
-    'price': 60
+    'ssd':
+        {
+            'type': '500Gb m.2 sata',
+            'price': 90
+        },
+    'nvme': {
+        'type': '500Gb m.2 nvme',
+        'price': 60
+    }
 }
 
 cache_disc = {
