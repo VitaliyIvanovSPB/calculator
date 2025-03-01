@@ -16,7 +16,7 @@ text = f'Send me sizing:\n' \
        f'`cpu_overcommit=`(default=3)\n' \
        f'`works_main=`(default=vSphere)\n' \
        f'`works_add=`(default=Нет)\n' \
-       f'(нет, vsphere, dr ,veeam, alb, tanzu, vdi, vdi public, vdi gpu, nsx)' \
+       f'(нет, vsphere, dr ,veeam, alb, tanzu, vdi, vdi_public, vdi_gpu, vdi_gpu_public, nsx)' \
        f'`network_card_qty=`(default=1)\n' \
        f'`slack_space=`(default=0.2)\n' \
        f'`capacity_disk_type=`(default=ssd)\n' \
@@ -47,7 +47,7 @@ async def calculate(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     cpu_vendor = args.get('cpu_vendor', 'any')
     cpu_min_frequency = int(args.get('cpu_min_frequency', 0))
-    cpu_overcommit = int(args.get('cpu_overcommit', 3))
+    cpu_overcommit = float(args.get('cpu_overcommit', 3))
     works_main = args.get('works_main', 'vsphere')
     works_add = args.get('works_add', 'нет')
     network_card_qty = int(args.get('network_card_qty', 1))

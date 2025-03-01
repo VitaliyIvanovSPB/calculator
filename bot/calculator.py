@@ -90,7 +90,7 @@ def create_config(all_configs, capacity_disk_type, cpu, cpu_hosts, cpu_overcommi
                     f'{ram["ram_size"]}Gb {ram["ram_gen"]} {ram["price"]}': f'{ram_1host} шт',
                     'Esxi disk': f'{esxi_disc[capacity_disk_type]["type"]} {esxi_disc[capacity_disk_type]["price"]} - 1 шт',
                     'Cache disk': f'{cache_disc['size']} {cache_disc['type']} {cache_disc['vendor']} {cache_disc['price']} - {int(str(disk_group)[0])} шт',
-                    'Capacity disk': f'{disk_size} {capacity_disk_type} {capacity_disks[capacity_disk_type][disk_size]['name']} {capacity_disks[capacity_disk_type][disk_size]['price']} - {int(str(disk_group)[1])} шт',
+                    'Capacity disk': f'{disk_size} {capacity_disk_type} {capacity_disks[capacity_disk_type][disk_size]['name']} {capacity_disks[capacity_disk_type][disk_size]['price']} - {int(str(disk_group)[1])*int(str(disk_group)[0])} шт',
                     'Network card': f'{network_card["name"]} {network_card["price"]} - {network_card_qty} шт',
                     'HBA adapter': f'{hba["name"]} {hba["price"]} - 1 шт',
                     'Admin main works': works_main,
@@ -116,7 +116,7 @@ def format_top_configs(sorted_configs):
     return ''.join([item for sublist in top5 for item in sublist])
 
 
-def requested_config(vcpu: int, vram: int, vssd: int, cpu_vendor: str, cpu_min_frequency: int, cpu_overcommit: int,
+def requested_config(vcpu: int, vram: int, vssd: int, cpu_vendor: str, cpu_min_frequency: int, cpu_overcommit: float,
                      works_main: str, works_add: str, network_card_qty: int, slack_space, capacity_disk_type: str,
                      currency: int):
     all_configs = []
