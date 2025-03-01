@@ -644,36 +644,12 @@ servers = [
 ]
 
 rams = [
-    {
-        'ram_gen': 'DDR4',
-        'ram_size': 32,
-        'price': 120
-    },
-    {
-        'ram_gen': 'DDR4',
-        'ram_size': 64,
-        'price': 245
-    },
-    {
-        'ram_gen': 'DDR4',
-        'ram_size': 128,
-        'price': 684
-    },
-    {
-        'ram_gen': 'DDR5',
-        'ram_size': 32,
-        'price': 137
-    },
-    {
-        'ram_gen': 'DDR5',
-        'ram_size': 64,
-        'price': 280
-    },
-    {
-        'ram_gen': 'DDR5',
-        'ram_size': 128,
-        'price': 1250
-    },
+    {'ram_gen': 'DDR4', 'ram_size': 32, 'price': 120},
+    {'ram_gen': 'DDR4', 'ram_size': 64, 'price': 245},
+    {'ram_gen': 'DDR4', 'ram_size': 128, 'price': 684},
+    {'ram_gen': 'DDR5', 'ram_size': 32, 'price': 137},
+    {'ram_gen': 'DDR5', 'ram_size': 64, 'price': 280},
+    {'ram_gen': 'DDR5', 'ram_size': 128, 'price': 1250},
 
 ]
 
