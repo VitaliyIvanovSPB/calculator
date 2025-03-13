@@ -1,14 +1,31 @@
 import asyncio
+
+from click import command
 from fastapi import FastAPI
 import uvicorn
-from bot import TGBot
+from pydantic import BaseModel
+
+from bot import TGBot, send_message
 
 app = FastAPI()
 bot = TGBot()
 
-@app.get("/")
-async def health_check():
-    return {"status": "ok"}
+
+# Описание ожидаемых данных
+class MessageRequest(BaseModel):
+    data: dict
+    user_id: int
+
+
+@app.post('/calculate')
+def calculate(request: MessageRequest):
+    params = [f'{k}={v}' for k, v in request.data.items() if v]
+    requirements = ' '.join(params)
+    user = request.user_id
+    text = 'Copy command bellow and send to me\n'
+    command_calc = f'/calculate {requirements}'
+    send_message(user, text)
+    send_message(user, command_calc)
 
 
 async def run_fastapi():
@@ -42,3 +59,5 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
+

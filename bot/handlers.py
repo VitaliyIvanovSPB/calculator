@@ -88,9 +88,9 @@ async def send_config_page(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     keyboard = []
     if start > 0:
-        keyboard.append(InlineKeyboardButton("⬅️ Назад", callback_data="prev"))
+        keyboard.append(InlineKeyboardButton("⬅️ Prev", callback_data="prev"))
     if end < len(all_configs):
-        keyboard.append(InlineKeyboardButton("Вперёд ➡️", callback_data="next"))
+        keyboard.append(InlineKeyboardButton("Next ➡️", callback_data="next"))
 
     reply_markup = InlineKeyboardMarkup([keyboard]) if keyboard else None
 
@@ -100,7 +100,6 @@ async def send_config_page(update: Update, context: ContextTypes.DEFAULT_TYPE):
         query = update.callback_query
         await query.answer()
         await query.message.edit_text(text, reply_markup=reply_markup)
-
 
 
 async def change_page(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -143,16 +142,17 @@ async def webapp_data(update: Update, context):
         usd = get_cbr_currency_rate()
         await update.message.reply_text(f'Received data: {data}')
         all_configs = requested_config(vcpu=int(data['vcpu']), vram=int(data['vram']), vssd=int(data['vssd']),
-                                cpu_vendor=data['cpu_vendor'],
-                                cpu_min_frequency=int(data['cpu_min_frequency']),
-                                cpu_overcommit=float(data['cpu_overcommit']),
-                                works_main=data['works_main'],
-                                works_add=data['works_add'],
-                                network_card_qty=int(data['network_card_qty']),
-                                slack_space=float(data['slack_space']),
-                                capacity_disk_type=data['capacity_disk_type'],
-                                currency=math.ceil(
-                                    float(data['currency']) if data['currency'] != '' else (usd if usd else 100)))
+                                       cpu_vendor=data['cpu_vendor'],
+                                       cpu_min_frequency=int(data['cpu_min_frequency']),
+                                       cpu_overcommit=float(data['cpu_overcommit']),
+                                       works_main=data['works_main'],
+                                       works_add=data['works_add'],
+                                       network_card_qty=int(data['network_card_qty']),
+                                       slack_space=float(data['slack_space']),
+                                       capacity_disk_type=data['capacity_disk_type'],
+                                       currency=math.ceil(
+                                           float(data['currency']) if data['currency'] != '' else (
+                                               usd if usd else 100)))
         context.user_data['configs'] = all_configs
         context.user_data['page'] = 0
         await send_config_page(update, context)
