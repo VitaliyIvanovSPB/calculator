@@ -109,11 +109,11 @@ def create_config(all_configs, capacity_disk_type, cpu, cpu_hosts, cpu_overcommi
                     f'{ram["ram_size"]}Gb {ram["ram_gen"]} {ram["price"]}$': f'{ram_1host} шт',
                     'Esxi disk': f'{esxi_disc[capacity_disk_type]["type"]} '
                                  f'{esxi_disc[capacity_disk_type]["price"]}$ - 1 шт',
-                    'Cache disk': f'{cache_disc['size']} {cache_disc['type']} {cache_disc['price']}$ - '
+                    'Cache disk': f'{cache_disc["size"]} {cache_disc["type"]} {cache_disc["price"]}$ - '
                                   f'{int(str(disk_group)[0])} шт',
                     'Capacity disk': f'{disk_size} {capacity_disk_type} '
-                                     f'{capacity_disks[capacity_disk_type][disk_size]['name']} '
-                                     f'{capacity_disks[capacity_disk_type][disk_size]['price']}$ - '
+                                     f'{capacity_disks[capacity_disk_type][disk_size]["name"]} '
+                                     f'{capacity_disks[capacity_disk_type][disk_size]["price"]}$ - '
                                      f'{int(str(disk_group)[1]) * int(str(disk_group)[0])} шт',
                     'Network card': f'{network_card["name"]} {network_card["price"]}$ - {network_card_qty} шт',
                     'HBA adapter': f'{hba["name"]} {hba["price"]}$ - 1 шт',
