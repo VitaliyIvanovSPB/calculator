@@ -1,6 +1,5 @@
 import asyncio
 
-from click import command
 from fastapi import FastAPI
 import uvicorn
 from pydantic import BaseModel
