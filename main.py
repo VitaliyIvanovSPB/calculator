@@ -1,11 +1,10 @@
 import asyncio
 from fastapi import FastAPI
 import uvicorn
-from bot import run_bot
-import signal
+from bot import TGBot
 
 app = FastAPI()
-
+bot = TGBot()
 
 @app.get("/")
 async def health_check():
@@ -17,8 +16,7 @@ async def run_fastapi():
         app,
         host="127.0.0.1",
         port=8000,
-        log_level="info"
-    )
+        log_level="info")
     server = uvicorn.Server(config)
     await server.serve()
 
@@ -27,18 +25,14 @@ async def main():
     loop = asyncio.get_event_loop()
 
     # Создаем задачи и сохраняем ссылки
-    tasks = [
-        asyncio.create_task(run_fastapi()),
-        asyncio.create_task(run_bot())
-    ]
+    tasks = [asyncio.create_task(run_fastapi()),
+             asyncio.create_task(bot.start())]
 
     # Обработчик для graceful shutdown
     def shutdown_handler(sig=None):
         for task in tasks:
             task.cancel()
         print("\nApplication shutdown")
-
-
 
     try:
         await asyncio.gather(*tasks)

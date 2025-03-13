@@ -10,24 +10,41 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
                     level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-async def run_bot():
-    logger.info("Starting the bot...")
 
-    application = None
-    try:
-        application = Application.builder().token(TOKEN).build()
-        setup_all_handlers(application)
+class TGBot:
+    def __init__(self):
+        self.token = TOKEN
+        self.application = None
 
-        # Явная инициализация
-        await application.initialize()
-        await application.start()
 
-        # Запускаем поллинг
-        await application.updater.start_polling()
+    async def initialize(self):
+        logger.info("Initializing the bot...")
 
-        # Бесконечный цикл ожидания
-        while True:
-            await asyncio.sleep(3600)
+        try:
+            # Build the application using the token
+            self.application = Application.builder().token(self.token).build()
+            setup_all_handlers(self.application)
 
-    except asyncio.CancelledError:
-        print("Bot shutdown requested")
+            # Initialize the application
+            await self.application.initialize()
+            await self.application.start()
+
+            # Start polling
+            await self.application.updater.start_polling()
+
+            # Keep the bot running
+            while True:
+                await asyncio.sleep(3600)
+
+        except asyncio.CancelledError:
+            logger.info("Bot shutdown requested")
+
+    async def start(self):
+        await self.initialize()
+
+    async def stop(self):
+        if self.application:
+            await self.application.stop()
+
+    async def webapp_data(self, data):
+        pass

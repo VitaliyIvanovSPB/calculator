@@ -131,14 +131,7 @@ def create_config(all_configs, capacity_disk_type, cpu, cpu_hosts, cpu_overcommi
                 })
 
 
-def format_top_configs(sorted_configs):
-    top5 = []
-    for index, config in enumerate(sorted_configs, 1):
-        conf = [f'\nТоп {index}:\n']
-        for key, value in config.items():
-            conf.append(f'{key}: {value}\n')
-        top5.append(conf)
-    return ''.join([item for sublist in top5 for item in sublist])
+
 
 
 def requested_config(vcpu: int, vram: int, vssd: int, cpu_vendor: str, cpu_min_frequency: int, cpu_overcommit: float,
@@ -156,9 +149,9 @@ def requested_config(vcpu: int, vram: int, vssd: int, cpu_vendor: str, cpu_min_f
                 create_config(all_configs, capacity_disk_type, cpu, cpu_hosts, cpu_overcommit, network_card_qty, ram,
                               ram_1host, server, slack_space, vssd, works_add, works_main, currency)
 
-    sorted_configs = sorted(all_configs, key=lambda x: int(x['Total price, Rub'].split(' ')[0]))[:5]
+    sorted_configs = sorted(all_configs, key=lambda x: int(x['Total price, Rub'].split(' ')[0]))
 
-    return format_top_configs(sorted_configs)
+    return sorted_configs
 
 
 if __name__ == '__main__':

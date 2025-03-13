@@ -3,7 +3,7 @@ import math
 
 import telegram.ext as tg_ext
 
-from telegram.ext import filters, MessageHandler, CommandHandler, ContextTypes
+from telegram.ext import filters, MessageHandler, CommandHandler, ContextTypes, CallbackQueryHandler
 from telegram import Update, WebAppInfo, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.constants import ParseMode
 from .calculator import requested_config
@@ -34,15 +34,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=update.effective_chat.id,
                                    text=text,
                                    parse_mode=ParseMode.MARKDOWN, reply_markup=reply_markup)
-    # inline_keyboard = [
-    #     [InlineKeyboardButton("Open in app",
-    #                           web_app=WebAppInfo(url="https://vitaliyivanovspb.github.io/selectel_vmware"),
-    #                           callback_data=)]
-    # ]
-    # inline_reply_markup = InlineKeyboardMarkup(inline_keyboard)
-    # await context.bot.send_message(chat_id=update.effective_chat.id,
-    #                                text=text,
-    #                                parse_mode=ParseMode.MARKDOWN, reply_markup=inline_reply_markup)
 
 
 async def calculate(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -72,12 +63,73 @@ async def calculate(update: Update, context: ContextTypes.DEFAULT_TYPE):
     usd = get_cbr_currency_rate()
     currency = int(args.get('currency', math.ceil(usd) if usd else 100))
 
-    top5 = requested_config(vcpu=vcpu, vram=vram, vssd=vssd,
-                            cpu_vendor=cpu_vendor, cpu_min_frequency=cpu_min_frequency, cpu_overcommit=cpu_overcommit,
-                            works_main=works_main.lower(), works_add=works_add.lower(),
-                            network_card_qty=network_card_qty,
-                            slack_space=slack_space, capacity_disk_type=capacity_disk_type.lower(), currency=currency)
-    await context.bot.send_message(chat_id=update.effective_chat.id, text=top5)
+    all_configs = requested_config(vcpu=vcpu, vram=vram, vssd=vssd,
+                                   cpu_vendor=cpu_vendor, cpu_min_frequency=cpu_min_frequency,
+                                   cpu_overcommit=cpu_overcommit,
+                                   works_main=works_main.lower(), works_add=works_add.lower(),
+                                   network_card_qty=network_card_qty,
+                                   slack_space=slack_space, capacity_disk_type=capacity_disk_type.lower(),
+                                   currency=currency)
+    context.user_data['configs'] = all_configs
+    context.user_data['page'] = 0
+    await send_config_page(update, context)
+
+
+async def send_config_page(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    page = context.user_data.get('page', 0)
+    all_configs = context.user_data.get('configs', [])
+
+    configs_per_page = 3
+    start = page * configs_per_page
+    end = start + configs_per_page
+    paginated_configs = all_configs[start:end]
+
+    text = "".join(format_config(i + start + 1, conf) for i, conf in enumerate(paginated_configs))
+
+    keyboard = []
+    if start > 0:
+        keyboard.append(InlineKeyboardButton("⬅️ Назад", callback_data="prev"))
+    if end < len(all_configs):
+        keyboard.append(InlineKeyboardButton("Вперёд ➡️", callback_data="next"))
+
+    reply_markup = InlineKeyboardMarkup([keyboard]) if keyboard else None
+
+    if update.message:  # Если это команда /calculate
+        await update.message.reply_text(text, reply_markup=reply_markup)
+    elif update.callback_query:  # Если это нажатие на кнопку "Вперёд" или "Назад"
+        query = update.callback_query
+        await query.answer()
+        await query.message.edit_text(text, reply_markup=reply_markup)
+
+
+
+async def change_page(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    if query.data == "prev":
+        context.user_data['page'] = max(0, context.user_data['page'] - 1)
+    elif query.data == "next":
+        context.user_data['page'] = min(len(context.user_data['configs']) // 3, context.user_data['page'] + 1)
+
+    await send_config_page(update, context)
+
+
+def format_config(index, config):
+    conf = [f'\nТоп {index}:\n']
+    for key, value in config.items():
+        conf.append(f'{key}: {value}\n')
+    return "".join(conf)
+
+
+def format_configs(sorted_configs):
+    top5 = []
+    for index, config in enumerate(sorted_configs, 1):
+        conf = [f'\nТоп {index}:\n']
+        for key, value in config.items():
+            conf.append(f'{key}: {value}\n')
+        top5.append(conf)
+    return ''.join([item for sublist in top5 for item in sublist])
 
 
 async def unknown(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -90,7 +142,7 @@ async def webapp_data(update: Update, context):
         data = json.loads(json_str)
         usd = get_cbr_currency_rate()
         await update.message.reply_text(f'Received data: {data}')
-        top5 = requested_config(vcpu=int(data['vcpu']), vram=int(data['vram']), vssd=int(data['vssd']),
+        all_configs = requested_config(vcpu=int(data['vcpu']), vram=int(data['vram']), vssd=int(data['vssd']),
                                 cpu_vendor=data['cpu_vendor'],
                                 cpu_min_frequency=int(data['cpu_min_frequency']),
                                 cpu_overcommit=float(data['cpu_overcommit']),
@@ -99,8 +151,11 @@ async def webapp_data(update: Update, context):
                                 network_card_qty=int(data['network_card_qty']),
                                 slack_space=float(data['slack_space']),
                                 capacity_disk_type=data['capacity_disk_type'],
-                                currency=math.ceil(float(data['currency']) if data['currency']!='' else (usd if usd else 100)))
-        await context.bot.send_message(chat_id=update.effective_chat.id, text=top5)
+                                currency=math.ceil(
+                                    float(data['currency']) if data['currency'] != '' else (usd if usd else 100)))
+        context.user_data['configs'] = all_configs
+        context.user_data['page'] = 0
+        await send_config_page(update, context)
     except json.JSONDecodeError as e:
         print(f"Ошибка декодирования JSON: {e}")
         return None
@@ -112,12 +167,14 @@ def setup_all_handlers(application: tg_ext.Application) -> None:
     echo_handler = MessageHandler(filters.TEXT & (~filters.COMMAND), start)
     calc_handler = CommandHandler('calculate', calculate)
     web_app_handler = MessageHandler(filters.StatusUpdate.WEB_APP_DATA, webapp_data)
+    change_page_handler = CallbackQueryHandler(change_page)
 
     application.add_handler(start_handler)
     application.add_handler(help_handler)
     application.add_handler(echo_handler)
     application.add_handler(calc_handler)
     application.add_handler(web_app_handler)
+    application.add_handler(change_page_handler)
 
     # Other handlers
     unknown_handler = MessageHandler(filters.COMMAND, unknown)

@@ -1,3 +1,3 @@
-__all__ = ['run_bot']
+__all__ = ['TGBot']
 
-from .bot import run_bot
+from .bot import TGBot
