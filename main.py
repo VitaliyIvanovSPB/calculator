@@ -30,12 +30,12 @@ def calculate(request: MessageRequest):
 async def run_fastapi():
     config = uvicorn.Config(
         app,
-        host="127.0.0.1",
-        port=8000,
+        host="0.0.0.0",
+        port=80,
         log_level="info")
     server = uvicorn.Server(config)
     await server.serve()
-
+# WARNING:  Invalid HTTP request received.
 
 async def main():
     loop = asyncio.get_event_loop()
