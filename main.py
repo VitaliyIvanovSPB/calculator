@@ -22,7 +22,7 @@ app.add_middleware(
 class MessageRequest(BaseModel):
     data: dict
     user_id: int
-
+    queryId: str
 
 @app.post('/calculate')
 def calculate(request: MessageRequest):
@@ -43,7 +43,6 @@ async def run_fastapi():
         log_level="info")
     server = uvicorn.Server(config)
     await server.serve()
-# WARNING:  Invalid HTTP request received.
 
 async def main():
     loop = asyncio.get_event_loop()
