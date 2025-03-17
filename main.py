@@ -1,6 +1,8 @@
 import asyncio
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
 import uvicorn
 from pydantic import BaseModel
 
@@ -9,7 +11,13 @@ from bot import TGBot, send_message
 app = FastAPI()
 bot = TGBot()
 
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Разрешить все источники (не рекомендуется для продакшена)
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 # Описание ожидаемых данных
 class MessageRequest(BaseModel):
     data: dict
