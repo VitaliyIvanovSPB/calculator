@@ -11,13 +11,13 @@ from bot import TGBot, send_message
 app = FastAPI()
 bot = TGBot()
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Разрешить все источники (не рекомендуется для продакшена)
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],  # Разрешить все источники (не рекомендуется для продакшена)
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
 # Описание ожидаемых данных
 class MessageRequest(BaseModel):
     data: dict
