@@ -39,8 +39,10 @@ async def run_fastapi():
     config = uvicorn.Config(
         app,
         host="0.0.0.0",
-        port=8000,
+        port=443,
         log_level="info",
+        ssl_keyfile="key.pem",
+        ssl_certfile="cert.pem",
     )
     server = uvicorn.Server(config)
     await server.serve()
