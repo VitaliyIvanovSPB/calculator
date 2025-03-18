@@ -13,19 +13,15 @@ app = FastAPI()
 bot = TGBot()
 
 # Настройки CORS
-origins = [
-    "https://vitaliyivanovspb.github.io",  # Ваш фронтенд
-    "http://localhost:8000",               # Для локального тестирования
-    "https://web.telegram.org"             # Telegram Web
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["https://vitaliyivanovspb.github.io"], # Точный домен
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"], # Разрешить все методы
+    allow_headers=["*"], # Разрешить все заголовки
+    expose_headers=["*"] # Важно для кастомных заголовков
 )
+
 # Описание ожидаемых данных
 class MessageRequest(BaseModel):
     data: str
