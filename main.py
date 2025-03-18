@@ -31,7 +31,7 @@ class MessageRequest(BaseModel):
 
 @app.post('/calculate')
 def calculate(request: MessageRequest):
-    print(request)
+    print(json.loads(request.data))
     # params = [f'{k}={v}' for k, v in data.items() if v]
     # requirements = ' '.join(params)
     # user = request.user_id
