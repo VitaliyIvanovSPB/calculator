@@ -1,4 +1,5 @@
 import asyncio
+import json
 from typing import Optional
 
 from fastapi import FastAPI
@@ -30,7 +31,8 @@ class MessageRequest(BaseModel):
 
 @app.post('/calculate')
 def calculate(request: MessageRequest):
-    params = [f'{k}={v}' for k, v in request.data.items() if v]
+    data = json.loads(request.data)
+    params = [f'{k}={v}' for k, v in data.items() if v]
     requirements = ' '.join(params)
     user = request.user_id
     text = 'Copy command bellow and send to me\n'
