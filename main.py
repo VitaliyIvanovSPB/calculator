@@ -16,7 +16,7 @@ bot = TGBot()
 # Настройки CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://vitaliyivanovspb.github.io"], # Точный домен
+    allow_origins=["*"], # Точный домен
     allow_credentials=True,
     allow_methods=["*"], # Разрешить все методы
     allow_headers=["*"], # Разрешить все заголовки
