@@ -1,4 +1,5 @@
 import asyncio
+from typing import Optional
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -20,9 +21,9 @@ app.add_middleware(
 )
 # Описание ожидаемых данных
 class MessageRequest(BaseModel):
-    data: dict
+    data: str
     userId: int
-    queryId: str
+    queryId: Optional[str] = None
 
 @app.post('/calculate')
 def calculate(request: MessageRequest):
