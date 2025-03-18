@@ -31,14 +31,14 @@ class MessageRequest(BaseModel):
 
 @app.post('/calculate')
 def calculate(request: MessageRequest):
-    print(json.loads(request.data))
-    # params = [f'{k}={v}' for k, v in data.items() if v]
-    # requirements = ' '.join(params)
-    # user = request.user_id
-    # text = 'Copy command bellow and send to me\n'
-    # command_calc = f'/calculate {requirements}'
-    # send_message(user, text)
-    # send_message(user, command_calc)
+    data = json.loads(request.data)
+    params = [f'{k}={v}' for k, v in data.items() if v]
+    requirements = ' '.join(params)
+    user = request.user_id
+    text = 'Copy command bellow and send to me\n'
+    command_calc = f'/calculate {requirements}'
+    send_message(user, text)
+    send_message(user, command_calc)
 
 
 async def run_fastapi():
