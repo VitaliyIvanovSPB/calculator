@@ -21,7 +21,7 @@ app.add_middleware(
 # Описание ожидаемых данных
 class MessageRequest(BaseModel):
     data: dict
-    user_id: int
+    userid: int
     queryId: str
 
 @app.post('/calculate')
