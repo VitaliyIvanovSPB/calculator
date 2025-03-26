@@ -89,14 +89,14 @@ def get_esxi_disks():
     with sqlite3.connect(DB_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute('SELECT * FROM esxi_disks')
-        return {row[1]: {'type': row[2], 'price': row[3]} for row in cursor.fetchall()}
+        return {row[1]: {'disk_type': row[2], 'price': row[3]} for row in cursor.fetchall()}
 
 
 def get_cache_disks():
     with sqlite3.connect(DB_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute('SELECT * FROM cache_disks')
-        return [{'type': row[1], 'size': row[2], 'price': row[3]} for row in cursor.fetchall()]
+        return [{'disk_type': row[1], 'capacity': row[2], 'price': row[3]} for row in cursor.fetchall()]
 
 
 def get_network_cards():
@@ -120,10 +120,9 @@ def get_capacity_disks():
         capacity_disks = {'ssd': {}, 'nvme': {}}
         for row in cursor.fetchall():
             disk_type = row[1]
-            disk_capacity = row[2]
-            name = row[3]
-            price = row[4]
-            capacity_disks[disk_type][disk_capacity] = {'name': name, 'price': price}
+            capacity = row[2]
+            price = row[3]
+            capacity_disks[disk_type][capacity] = {'price': price}
         return capacity_disks
 
 

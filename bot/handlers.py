@@ -79,12 +79,12 @@ async def send_config_page(update: Update, context: ContextTypes.DEFAULT_TYPE):
     page = context.user_data.get('page', 0)
     all_configs = context.user_data.get('configs', [])
 
-    configs_per_page = 3
+    configs_per_page = 1
     start = page * configs_per_page
     end = start + configs_per_page
     paginated_configs = all_configs[start:end]
 
-    text = "".join(format_config(i + start + 1, conf) for i, conf in enumerate(paginated_configs))
+    message_text = "".join(format_config(i + start + 1, conf) for i, conf in enumerate(paginated_configs))
 
     keyboard = []
     if start > 0:
@@ -95,11 +95,11 @@ async def send_config_page(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup([keyboard]) if keyboard else None
 
     if update.message:  # Если это команда /calculate
-        await update.message.reply_text(text, reply_markup=reply_markup)
+        await update.message.reply_text(message_text, reply_markup=reply_markup)
     elif update.callback_query:  # Если это нажатие на кнопку "Вперёд" или "Назад"
         query = update.callback_query
         await query.answer()
-        await query.message.edit_text(text, reply_markup=reply_markup)
+        await query.message.edit_text(message_text, reply_markup=reply_markup)
 
 
 async def change_page(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -121,41 +121,34 @@ def format_config(index, config):
     return "".join(conf)
 
 
-def format_configs(sorted_configs):
-    top5 = []
-    for index, config in enumerate(sorted_configs, 1):
-        conf = [f'\nТоп {index}:\n']
-        for key, value in config.items():
-            conf.append(f'{key}: {value}\n')
-        top5.append(conf)
-    return ''.join([item for sublist in top5 for item in sublist])
-
-
 async def unknown(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Sorry, I didn't understand that command.")
 
 
 async def webapp_data(update: Update, context):
-    json_str = update.message.web_app_data.data
+    command, json_str = update.message.web_app_data.data.split('=')
     try:
-        data = json.loads(json_str)
-        usd = get_cbr_currency_rate()
-        await update.message.reply_text(f'Received data: {data}')
-        all_configs = requested_config(vcpu=int(data['vcpu']), vram=int(data['vram']), vssd=int(data['vssd']),
-                                       cpu_vendor=data['cpu_vendor'],
-                                       cpu_min_frequency=int(data['cpu_min_frequency']),
-                                       cpu_overcommit=float(data['cpu_overcommit']),
-                                       works_main=data['works_main'],
-                                       works_add=data['works_add'],
-                                       network_card_qty=int(data['network_card_qty']),
-                                       slack_space=float(data['slack_space']),
-                                       capacity_disk_type=data['capacity_disk_type'],
-                                       currency=math.ceil(
-                                           float(data['currency']) if data['currency'] != '' else (
-                                               usd if usd else 100)))
-        context.user_data['configs'] = all_configs
-        context.user_data['page'] = 0
-        await send_config_page(update, context)
+        if command=='calc':
+            data = json.loads(json_str)
+            usd = get_cbr_currency_rate()
+            await update.message.reply_text(f'Received data:{command} {data}')
+            all_configs = requested_config(vcpu=int(data['vcpu']), vram=int(data['vram']), vssd=int(data['vssd']),
+                                           cpu_vendor=data['cpu_vendor'],
+                                           cpu_min_frequency=int(data['cpu_min_frequency']),
+                                           cpu_overcommit=float(data['cpu_overcommit']),
+                                           works_main=data['works_main'],
+                                           works_add=data['works_add'],
+                                           network_card_qty=int(data['network_card_qty']),
+                                           slack_space=float(data['slack_space']),
+                                           capacity_disk_type=data['capacity_disk_type'],
+                                           currency=math.ceil(
+                                               float(data['currency']) if data['currency'] != '' else (
+                                                   usd if usd else 100)))
+            context.user_data['configs'] = all_configs
+            context.user_data['page'] = 0
+            await send_config_page(update, context)
+        else:
+            print(command)
     except json.JSONDecodeError as e:
         print(f"Ошибка декодирования JSON: {e}")
         return None

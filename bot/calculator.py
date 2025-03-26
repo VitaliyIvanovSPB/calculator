@@ -15,7 +15,7 @@ def get_works_price(hosts_qty: int, main: str, additional: str):
         return "Очень много."
 
     return parameters['works_base'] * (
-                get_works_coefficient()[main][index] + get_works_coefficient()[additional][index])
+            get_works_coefficient()[main][index] + get_works_coefficient()[additional][index])
 
 
 def get_switches_price(value: int, ports_qty: list):
@@ -96,46 +96,39 @@ def create_config(all_configs, capacity_disk_type, cpu, cpu_hosts, cpu_overcommi
                                                             network_card_qty=network_card_qty))
                 total_price = vmware + works + network_price
 
-                vcpu_available = math.ceil(
-                    (cpu["cores_quantity"] * 2 * cpu_hosts * cpu_overcommit * parameters['max_cpu_usage']))
-                vram_available = math.ceil(ram_1host * ram["ram_size"] * cpu_hosts * parameters['max_ram_usage'])
+                # vcpu_available = math.ceil(
+                #     (cpu["cores_quantity"] * 2 * cpu_hosts * cpu_overcommit * parameters['max_cpu_usage']))
+                # vram_available = math.ceil(ram_1host * ram["ram_size"] * cpu_hosts * parameters['max_ram_usage'])
                 all_configs.append({
                     'Need hosts by CPU(n+1)': cpu_hosts_n,
                     'AllFlash vSAN': raid_config[key]['FTM'],
                     'Failures to Tolerate': raid_config[key]['FTT'],
                     'CPU overcommit': f'{cpu_overcommit}',
-                    'CPU': f'{cpu["name"]} {cpu["price"]}$ - 2 шт',
-                    'Server': f'{server["name"]} {server["price"]}$ - 1 шт',
-                    f'{ram["ram_size"]}Gb {ram["ram_gen"]} {ram["price"]}$': f'{ram_1host} шт',
-                    'Esxi disk': f'{esxi_disc[capacity_disk_type]["type"]} '
-                                 f'{esxi_disc[capacity_disk_type]["price"]}$ - 1 шт',
-                    'Cache disk': f'{cache_disc["size"]} {cache_disc["type"]} {cache_disc["price"]}$ - '
-                                  f'{int(str(disk_group)[0])} шт',
-                    'Capacity disk': f'{disk_size} {capacity_disk_type} '
-                                     f'{capacity_disks[capacity_disk_type][disk_size]["name"]} '
-                                     f'{capacity_disks[capacity_disk_type][disk_size]["price"]}$ - '
-                                     f'{int(str(disk_group)[1]) * int(str(disk_group)[0])} шт',
-                    'Network card': f'{network_card["name"]} {network_card["price"]}$ - {network_card_qty} шт',
-                    'HBA adapter': f'{hba["name"]} {hba["price"]}$ - 1 шт',
+                    'CPU': f'{cpu["name"]} - 2 шт',
+                    'Server': f'{server["name"]} - 1 шт',
+                    f'{ram["ram_size"]}Gb {ram["ram_gen"]}': f'{ram_1host} шт',
+                    'Esxi disk': f'{esxi_disc[capacity_disk_type]["disk_type"]} - 1 шт',
+                    'Cache disk': f'{cache_disc["capacity"]} {cache_disc["disk_type"]} - {int(str(disk_group)[0])} шт',
+                    'Capacity disk': f'{disk_size} {capacity_disk_type} - {int(str(disk_group)[1]) * int(str(disk_group)[0])} шт',
+                    'Network card': f'{network_card["name"]} - {network_card_qty} шт',
+                    'HBA adapter': f'{hba["name"]} - 1 шт',
                     'Admin main works': f'{works_main}',
                     'Additional works': f'{works_add}',
                     'Works price': f'{works} руб.',
                     'Network': f'{network_price} руб.',
-                    'vCPU available': f'{vcpu_available}',
-                    'vRAM available': f'{vram_available}',
-                    'vSSD available': f'{disks_capacity * cpu_hosts}',
-                    'vSSD raw': f'{vsan_raw}',
+                    # 'vCPU available': f'{vcpu_available}',
+                    # 'vRAM available': f'{vram_available}',
+                    # 'vSSD available': f'{disks_capacity * cpu_hosts}',
+                    # 'vSSD raw': f'{vsan_raw}',
                     '1 host rms, Rub': f'{rms} руб.',
                     'Total price, Rub': f'{total_price} руб.',
                     'USD/RUB': f'{currency} руб.',
                 })
 
 
-
-
-
 def requested_config(vcpu: int, vram: int, vssd: int, cpu_vendor: str, cpu_min_frequency: int, cpu_overcommit: float,
-                     works_main: str, works_add: str, network_card_qty: int, slack_space:float, capacity_disk_type: str,
+                     works_main: str, works_add: str, network_card_qty: int, slack_space: float,
+                     capacity_disk_type: str,
                      currency: int):
     all_configs = []
     for cpu in get_cpus_filtered(cpu_vendor=cpu_vendor, cpu_min_frequency=cpu_min_frequency):
