@@ -81,20 +81,24 @@ def create_config(all_configs, capacity_disk_type, cpu, cpu_hosts, cpu_overcommi
             vsan_and_disks_limit = check_vsan_and_disks_limit(cpu_hosts, disks_capacity, host_disks_qty, server,
                                                               vsan_raw, vssd)
             if vsan_and_disks_limit:
-                hba = hba_adapter[8] if host_disks_hba_qty < 9 else hba_adapter[16]
+                if capacity_disk_type == 'ssd':
+                    hba = hba_adapter[8] if host_disks_hba_qty < 9 else hba_adapter[16]
+                else:
+                    hba = None
                 vsan_disks_price = get_vsan_disks_price(capacity_disk_type=capacity_disk_type, disk_size=disk_size,
                                                         disks_qty=disk_group, cache_disc=cache_disc,
                                                         capacity_disks=capacity_disks)
                 host_price = (cpu['price'] * 2 + server['price'] + ram_1host * ram['price'] +
                               esxi_disc[capacity_disk_type]['price'] + network_card['price'] + vsan_disks_price +
-                              hba['price'])
+                              (hba['price'] if hba else 0))
                 rms = math.ceil(host_price * currency / parameters['payback_period'] * parameters['coefficient'])
                 vmware = rms * cpu_hosts_n
-                works = math.ceil(
-                    get_works_price(hosts_qty=cpu_hosts_n, main=works_main, additional=works_add))
+                # works = math.ceil(
+                #     get_works_price(hosts_qty=cpu_hosts_n, main=works_main, additional=works_add))
                 network_price = math.ceil(get_network_price(host_qty=cpu_hosts_n,
                                                             network_card_qty=network_card_qty))
-                total_price = vmware + works + network_price
+                # total_price = vmware + works + network_price
+                total_price = vmware + network_price
 
                 # vcpu_available = math.ceil(
                 #     (cpu["cores_quantity"] * 2 * cpu_hosts * cpu_overcommit * parameters['max_cpu_usage']))
@@ -111,10 +115,10 @@ def create_config(all_configs, capacity_disk_type, cpu, cpu_hosts, cpu_overcommi
                     'Cache disk': f'{cache_disc["capacity"]} {cache_disc["disk_type"]} - {int(str(disk_group)[0])} шт',
                     'Capacity disk': f'{disk_size} {capacity_disk_type} - {int(str(disk_group)[1]) * int(str(disk_group)[0])} шт',
                     'Network card': f'{network_card["name"]} - {network_card_qty} шт',
-                    'HBA adapter': f'{hba["name"]} - 1 шт',
-                    'Admin main works': f'{works_main}',
-                    'Additional works': f'{works_add}',
-                    'Works price': f'{works} руб.',
+                    'HBA adapter': f'{hba["name"]} - 1 шт' if hba else 0,
+                    # 'Admin main works': f'{works_main}',
+                    # 'Additional works': f'{works_add}',
+                    # 'Works price': f'{works} руб.',
                     'Network': f'{network_price} руб.',
                     # 'vCPU available': f'{vcpu_available}',
                     # 'vRAM available': f'{vram_available}',
