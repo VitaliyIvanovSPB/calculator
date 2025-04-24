@@ -63,7 +63,9 @@ def check_vsan_and_disks_limit(cpu_hosts, disks_capacity, host_disks_qty, server
 
 
 def create_config(all_configs, capacity_disk_type, cpu, cpu_hosts, cpu_overcommit, network_card_qty, ram, ram_1host,
-                  server, slack_space, vssd, works_add, works_main, currency):
+                  server, slack_space, vssd,
+                  # works_add, works_main,
+                  currency):
     esxi_disc = get_esxi_disks()
     cache_disc = get_cache_disks()[0]
     network_card = get_network_cards()[0]
@@ -131,7 +133,8 @@ def create_config(all_configs, capacity_disk_type, cpu, cpu_hosts, cpu_overcommi
 
 
 def requested_config(vcpu: int, vram: int, vssd: int, cpu_vendor: str, cpu_min_frequency: int, cpu_overcommit: float,
-                     works_main: str, works_add: str, network_card_qty: int, slack_space: float,
+                     # works_main: str, works_add: str,
+                     network_card_qty: int, slack_space: float,
                      capacity_disk_type: str,
                      currency: int):
     all_configs = []
@@ -144,7 +147,9 @@ def requested_config(vcpu: int, vram: int, vssd: int, cpu_vendor: str, cpu_min_f
                     continue
 
                 create_config(all_configs, capacity_disk_type, cpu, cpu_hosts, cpu_overcommit, network_card_qty, ram,
-                              ram_1host, server, slack_space, vssd, works_add, works_main, currency)
+                              ram_1host, server, slack_space, vssd,
+                              # works_add, works_main,
+                              currency)
 
     sorted_configs = sorted(all_configs, key=lambda x: int(x['Total price, Rub'].split(' ')[0]))
 
@@ -153,5 +158,7 @@ def requested_config(vcpu: int, vram: int, vssd: int, cpu_vendor: str, cpu_min_f
 
 if __name__ == '__main__':
     print(requested_config(vcpu=3900, vram=8000, vssd=2200, cpu_min_frequency=3000, cpu_overcommit=5, cpu_vendor='any',
-                           network_card_qty=1, works_main='vSphere', works_add='Нет', slack_space=0.2,
+                           network_card_qty=1,
+                           # works_main='vSphere', works_add='Нет',
+                           slack_space=0.2,
                            capacity_disk_type='nvme', currency=100))

@@ -1,3 +1,5 @@
+import csv
+import os
 import sqlite3
 from collections import defaultdict
 
@@ -140,21 +142,30 @@ def get_rams_filtered(ram_gen_filter):
             for row in cursor.fetchall()
         ]
 
-def update_cpu_price(cpu_name, new_price):
+
+def get_tables():
+    files=[]
     with sqlite3.connect(DB_PATH) as conn:
         cursor = conn.cursor()
-        cursor.execute("UPDATE cpus SET price = ? WHERE name = ?", (new_price, cpu_name))
-        conn.commit()
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
+        tables = cursor.fetchall()
+        for table in tables:
+            table_name = table[0]
+            # Получаем названия колонок
+            cursor.execute(f"PRAGMA table_info({table_name})")
+            columns = [col[1] for col in cursor.fetchall()]
+            # Получаем данные таблицы
+            cursor.execute(f"SELECT * FROM {table_name}")
+            rows = cursor.fetchall()
 
-def update_server_price(server_name, new_price):
-    with sqlite3.connect(DB_PATH) as conn:
-        cursor = conn.cursor()
-        cursor.execute("UPDATE servers SET price = ? WHERE name = ?", (new_price, server_name))
-        conn.commit()
-# update_cpu_price('Intel Core i7-12700K', 350.00)
-# update_server_price('Dell PowerEdge R740', 2000.00)
-
-
+            # Создаем временный CSV файл
+            filename = f"{table_name}.csv"
+            files.append(filename)
+            with open(filename, 'w', newline='', encoding='utf-8') as f:
+                writer = csv.writer(f)
+                writer.writerow(columns)
+                writer.writerows(rows)
+    return files
 
 def main():
     print("Основные параметры:", get_parameters())
