@@ -10,7 +10,7 @@ from telegram import Update, WebAppInfo, KeyboardButton, ReplyKeyboardMarkup, In
 from telegram.constants import ParseMode
 from .calculator import requested_config
 from .cbr import get_cbr_currency_rate
-from .get_data import get_tables
+from .get_data import get_tables, update_prices
 
 text = f'Send me sizing:\n' \
        f'`/calculate vcpu=240 vram=480 vssd=12000`\n' \
@@ -22,9 +22,11 @@ text = f'Send me sizing:\n' \
        f'`slack_space=`(default=0.2)\n' \
        f'`capacity_disk_type=`(default=ssd)\n' \
        f'`currency=`(default=cbr or 100)\n'
-       # f'`works_main=`(default=vsphere)\n' \
-       # f'`works_add=`(default=no)\n' \
-       # f'(no, vsphere, dr ,veeam, alb, tanzu, vdi, vdi\_public, vdi\_gpu, vdi\_gpu\_public, nsx)\n' \
+
+
+# f'`works_main=`(default=vsphere)\n' \
+# f'`works_add=`(default=no)\n' \
+# f'(no, vsphere, dr ,veeam, alb, tanzu, vdi, vdi\_public, vdi\_gpu, vdi\_gpu\_public, nsx)\n' \
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -131,7 +133,7 @@ async def unknown(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def webapp_data(update: Update, context):
     command, json_str = update.message.web_app_data.data.split('=')
     try:
-        if command=='calc':
+        if command == 'calc':
             data = json.loads(json_str)
             usd = get_cbr_currency_rate()
             await update.message.reply_text(f'Received data:{command} {data}')
@@ -161,10 +163,37 @@ async def tables(update: Update, context):
     """Обработчик команды /tables для отправки CSV-файлов таблиц"""
     files = get_tables()
     for file in files:
-    # Отправляем файл и удаляем временный
+        # Отправляем файл и удаляем временный
         with open(file, 'rb') as f:
             await update.message.reply_document(document=f, filename=file)
         os.remove(file)
+
+
+async def handle_csv(update: Update, context):
+    """Обработчик CSV-файлов для обновления таблиц"""
+    document = update.message.document
+
+    # Проверяем тип файла
+    if not document.file_name.endswith('.csv'):
+        await update.message.reply_text("Отправьте файл в формате CSV.")
+        return
+
+    # Скачиваем файл
+    file = await document.get_file()
+    file_path = await file.download_to_drive()
+
+    try:
+        # Определяем имя таблицы
+        table_name = os.path.splitext(document.file_name)[0]
+
+        result = update_prices(table_name, file_path)
+
+        await update.message.reply_text(result)
+
+    except Exception as e:
+        await update.message.reply_text(f"Ошибка обработки файла: {str(e)}")
+    finally:
+        os.remove(file_path)
 
 
 def setup_all_handlers(application: tg_ext.Application) -> None:
@@ -175,6 +204,8 @@ def setup_all_handlers(application: tg_ext.Application) -> None:
     tables_handler = CommandHandler('tables', tables)
     web_app_handler = MessageHandler(filters.StatusUpdate.WEB_APP_DATA, webapp_data)
     change_page_handler = CallbackQueryHandler(change_page)
+    csv_handler = MessageHandler(filters.Document.ALL, handle_csv)
+
 
     application.add_handler(start_handler)
     application.add_handler(help_handler)
@@ -183,6 +214,7 @@ def setup_all_handlers(application: tg_ext.Application) -> None:
     application.add_handler(tables_handler)
     application.add_handler(web_app_handler)
     application.add_handler(change_page_handler)
+    application.add_handler(csv_handler)
 
     # Other handlers
     unknown_handler = MessageHandler(filters.COMMAND, unknown)
