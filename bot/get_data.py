@@ -186,7 +186,9 @@ def update_prices(table_name, file_path):
 
             if csv_columns != table_columns:
                 return "Структура CSV не совпадает с таблицей."
-
+                # Очищаем таблицу перед вставкой новых данных
+            cursor.execute(f"DELETE FROM {table_name}")
+            conn.commit()
             # Получаем данные
             data = list(csv_reader)
 
