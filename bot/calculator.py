@@ -64,7 +64,7 @@ def check_vsan_and_disks_limit(cpu_hosts, disks_capacity, host_disks_qty, server
 
 def create_config(all_configs, capacity_disk_type, cpu, cpu_hosts, cpu_overcommit, network_card_qty, ram, ram_1host,
                   server, slack_space, vssd,
-                  # works_add, works_main,
+                  works_add, works_main,
                   currency):
     esxi_disc = get_esxi_disks()
     cache_disc = get_cache_disks()[0]
@@ -72,7 +72,8 @@ def create_config(all_configs, capacity_disk_type, cpu, cpu_hosts, cpu_overcommi
     hba_adapter = get_hba_adapters()
     capacity_disks = get_capacity_disks()
     raid_config = get_raid_config()
-    cpu_hosts_n = cpu_hosts + 1
+    n = n_qty(cpu_hosts)
+    cpu_hosts_n = cpu_hosts + n
     key = 6 if cpu_hosts_n >= 6 else (5 if cpu_hosts_n == 5 else 1)
     vsan_raw = vssd * raid_config[key]['disk_usage_overhead'] / (1 - slack_space)
 
@@ -95,18 +96,21 @@ def create_config(all_configs, capacity_disk_type, cpu, cpu_hosts, cpu_overcommi
                               (hba['price'] if hba else 0))
                 rms = math.ceil(host_price * currency / parameters['payback_period'] * parameters['coefficient'])
                 vmware = rms * cpu_hosts_n
-                # works = math.ceil(
-                #     get_works_price(hosts_qty=cpu_hosts_n, main=works_main, additional=works_add))
-                network_price = math.ceil(get_network_price(host_qty=cpu_hosts_n,
-                                                            network_card_qty=network_card_qty))
-                # total_price = vmware + works + network_price
-                total_price = vmware + network_price
+                works = math.ceil(
+                    get_works_price(hosts_qty=cpu_hosts_n, main=works_main, additional=works_add))
+                try:
+                    network_price = math.ceil(get_network_price(host_qty=cpu_hosts_n,
+                                                                network_card_qty=network_card_qty))
+                except TypeError:
+                    continue
+                total_price = vmware + works + network_price
+                # total_price = vmware + network_price
 
                 # vcpu_available = math.ceil(
                 #     (cpu["cores_quantity"] * 2 * cpu_hosts * cpu_overcommit * parameters['max_cpu_usage']))
                 # vram_available = math.ceil(ram_1host * ram["ram_size"] * cpu_hosts * parameters['max_ram_usage'])
                 all_configs.append({
-                    'Need hosts by CPU(n+1)': cpu_hosts_n,
+                    f'Need hosts by CPU(n+{n})': cpu_hosts_n,
                     'AllFlash vSAN': raid_config[key]['FTM'],
                     'Failures to Tolerate': raid_config[key]['FTT'],
                     'CPU overcommit': f'{cpu_overcommit}',
@@ -118,9 +122,9 @@ def create_config(all_configs, capacity_disk_type, cpu, cpu_hosts, cpu_overcommi
                     'Capacity disk': f'{disk_size} {capacity_disk_type} - {int(str(disk_group)[1]) * int(str(disk_group)[0])} шт',
                     'Network card': f'{network_card["name"]} - {network_card_qty} шт',
                     'HBA adapter': f'{hba["name"]} - 1 шт' if hba else 0,
-                    # 'Admin main works': f'{works_main}',
-                    # 'Additional works': f'{works_add}',
-                    # 'Works price': f'{works} руб.',
+                    'Admin main works': f'{works_main}',
+                    'Additional works': f'{works_add}',
+                    'Works price': f'{works} руб.',
                     'Network': f'{network_price} руб.',
                     # 'vCPU available': f'{vcpu_available}',
                     # 'vRAM available': f'{vram_available}',
@@ -132,8 +136,21 @@ def create_config(all_configs, capacity_disk_type, cpu, cpu_hosts, cpu_overcommi
                 })
 
 
+def n_qty(cpu_hosts):
+    if cpu_hosts <= 32:
+        return 1
+    elif cpu_hosts <= 64:
+        return 2
+    elif cpu_hosts <= 96:
+        return 3
+    elif cpu_hosts <= 128:
+        return 4
+    else:
+        return None
+
+
 def requested_config(vcpu: int, vram: int, vssd: int, cpu_vendor: str, cpu_min_frequency: int, cpu_overcommit: float,
-                     # works_main: str, works_add: str,
+                     works_main: str, works_add: str,
                      network_card_qty: int, slack_space: float,
                      capacity_disk_type: str,
                      currency: int):
@@ -148,7 +165,7 @@ def requested_config(vcpu: int, vram: int, vssd: int, cpu_vendor: str, cpu_min_f
 
                 create_config(all_configs, capacity_disk_type, cpu, cpu_hosts, cpu_overcommit, network_card_qty, ram,
                               ram_1host, server, slack_space, vssd,
-                              # works_add, works_main,
+                              works_add, works_main,
                               currency)
 
     sorted_configs = sorted(all_configs, key=lambda x: int(x['Total price, Rub'].split(' ')[0]))
@@ -159,6 +176,6 @@ def requested_config(vcpu: int, vram: int, vssd: int, cpu_vendor: str, cpu_min_f
 if __name__ == '__main__':
     print(requested_config(vcpu=3900, vram=8000, vssd=2200, cpu_min_frequency=3000, cpu_overcommit=5, cpu_vendor='any',
                            network_card_qty=1,
-                           # works_main='vSphere', works_add='Нет',
+                           works_main='vSphere', works_add='Нет',
                            slack_space=0.2,
                            capacity_disk_type='nvme', currency=100))
