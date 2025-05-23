@@ -12,34 +12,21 @@ def get_works_price(hosts_qty: int, main: str, additional: str):
     index = next((i for i, limit in enumerate(coefficients) if hosts_qty < limit), -1)
 
     if index == -1:
-        return "Очень много."
+        return 6
 
     return parameters['works_base'] * (
             get_works_coefficient()[main][index] + get_works_coefficient()[additional][index])
 
 
-def get_switches_price(value: int, ports_qty: list):
-    coefficients = [0.125, 0.25, 0.5, 1, 2, 3, 4]
-    index = next((coefficients[i] for i, limit in enumerate(ports_qty) if value <= limit), -1)
-    if index == -1:
-        return "Больше 4х"
-
-    return index
-
-
-def get_network_coefficient(value):
-    ports_map = {6: 0.125, 12: 0.25, 24: 0.5, 48: 1, 72: 1.5, 96: 2, 120: 2.5, 144: 3, 168: 3.5, 192: 4, 216: 5}
-    return next((v for k, v in ports_map.items() if value <= k), "Больше 5х")
-
-
-def get_network_ipmi_coefficient(value):
-    ports_map = {6: 0.125, 12: 0.25, 24: 0.5, 48: 1, 96: 2, 144: 3, 240: 4}
-    return next((v for k, v in ports_map.items() if value <= k), "Больше 5х")
+def get_network_coefficient(value, ports_map):
+    return next((v for k, v in ports_map.items() if value <= k), 8)
 
 
 def get_network_price(host_qty: int, network_card_qty: int):
-    network = get_network_coefficient(host_qty * network_card_qty * 2)
-    network_ipmi = get_network_ipmi_coefficient(host_qty * network_card_qty)
+    ports_map = {6: 0.125, 12: 0.25, 24: 0.5, 48: 1, 72: 1.5, 96: 2, 120: 2.5, 144: 3, 168: 3.5, 192: 4, 250: 5, 298: 6,
+                 346: 7}
+    network = get_network_coefficient(host_qty * network_card_qty * 2, ports_map)
+    network_ipmi = get_network_coefficient(host_qty * network_card_qty, ports_map)
     return network * parameters['switches'] + network_ipmi * parameters['switches_ipmi']
 
 
@@ -58,7 +45,7 @@ def get_vsan_disks_price(capacity_disk_type, disk_size, disks_qty, cache_disc, c
 def check_vsan_and_disks_limit(cpu_hosts, disks_capacity, host_disks_qty, server, vsan_raw, vssd):
     min_vsan_condition = vssd <= disks_capacity * cpu_hosts
     max_vsan_condition = disks_capacity * cpu_hosts < vsan_raw * 1.2
-    disks_limit_condition = host_disks_qty < server['max_disks_qty']
+    disks_limit_condition = host_disks_qty <= server['max_disks_qty']
     return min_vsan_condition and max_vsan_condition and disks_limit_condition
 
 
@@ -79,7 +66,7 @@ def create_config(all_configs, capacity_disk_type, cpu, cpu_hosts, cpu_overcommi
 
     for disk_size, disk_groups in get_raids_data()[key][slack_space].items():
         for disk_group, disks_capacity in disk_groups.items():
-            host_disks_qty = int(str(disk_group)[0]) * int(str(disk_group)[1]) + int(str(disk_group)[0])
+            host_disks_qty = int(str(disk_group)[0]) * int(str(disk_group)[1]) + int(str(disk_group)[0]) + 1 if capacity_disk_type == 'ssd' else 0
             host_disks_hba_qty = int(str(disk_group)[0]) * int(str(disk_group)[1])
             vsan_and_disks_limit = check_vsan_and_disks_limit(cpu_hosts, disks_capacity, host_disks_qty, server,
                                                               vsan_raw, vssd)
@@ -88,6 +75,9 @@ def create_config(all_configs, capacity_disk_type, cpu, cpu_hosts, cpu_overcommi
                     hba = hba_adapter[8] if host_disks_hba_qty < 9 else hba_adapter[16]
                 else:
                     hba = None
+                if disk_size == 15360 and capacity_disk_type == 'ssd':
+                    continue
+
                 vsan_disks_price = get_vsan_disks_price(capacity_disk_type=capacity_disk_type, disk_size=disk_size,
                                                         disks_qty=disk_group, cache_disc=cache_disc,
                                                         capacity_disks=capacity_disks)
@@ -114,13 +104,13 @@ def create_config(all_configs, capacity_disk_type, cpu, cpu_hosts, cpu_overcommi
                     'AllFlash vSAN': raid_config[key]['FTM'],
                     'Failures to Tolerate': raid_config[key]['FTT'],
                     'CPU overcommit': f'{cpu_overcommit}',
-                    'CPU': f'{cpu["name"]} - 2 шт',
-                    'Server': f'{server["name"]} - 1 шт',
-                    f'{ram["ram_size"]}Gb {ram["ram_gen"]}': f'{ram_1host} шт',
-                    'Esxi disk': f'{esxi_disc[capacity_disk_type]["disk_type"]} - 1 шт',
-                    'Cache disk': f'{cache_disc["capacity"]} {cache_disc["disk_type"]} - {int(str(disk_group)[0])} шт',
-                    'Capacity disk': f'{disk_size} {capacity_disk_type} - {int(str(disk_group)[1]) * int(str(disk_group)[0])} шт',
-                    'Network card': f'{network_card["name"]} - {network_card_qty} шт',
+                    'CPU': f'{cpu["name"]} {cpu["price"]}$ - 2 шт',
+                    'Server': f'{server["name"]} {server["price"]}$ - 1 шт',
+                    f'{ram["ram_size"]}Gb {ram["ram_gen"]} {ram["price"]}$' : f'{ram_1host} шт',
+                    'Esxi disk': f'{esxi_disc[capacity_disk_type]["disk_type"]} {esxi_disc[capacity_disk_type]["price"]}$ - 1 шт',
+                    'Cache disk': f'{cache_disc["capacity"]} {cache_disc["disk_type"]} {cache_disc["price"]}$ - {int(str(disk_group)[0])} шт',
+                    'Capacity disk': f'{disk_size} {capacity_disk_type} {capacity_disks[capacity_disk_type][disk_size]['price']}$ - {int(str(disk_group)[1]) * int(str(disk_group)[0])} шт',
+                    'Network card': f'{network_card["name"]} {network_card["price"]}$ - {network_card_qty} шт',
                     'HBA adapter': f'{hba["name"]} - 1 шт' if hba else 0,
                     'Admin main works': f'{works_main}',
                     'Additional works': f'{works_add}',
@@ -146,7 +136,7 @@ def n_qty(cpu_hosts):
     elif cpu_hosts <= 128:
         return 4
     else:
-        return None
+        return 5
 
 
 def requested_config(vcpu: int, vram: int, vssd: int, cpu_vendor: str, cpu_min_frequency: int, cpu_overcommit: float,
