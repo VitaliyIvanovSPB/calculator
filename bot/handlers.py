@@ -3,6 +3,7 @@ import math
 import os
 
 import telegram.ext as tg_ext
+from telegram.error import BadRequest
 
 from telegram.ext import filters, MessageHandler, CommandHandler, ContextTypes, CallbackQueryHandler
 from telegram import Update, WebAppInfo, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
@@ -99,7 +100,11 @@ async def send_config_page(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup([keyboard]) if keyboard else None
 
     if update.message:  # Если это команда /calculate
-        await update.message.reply_text(message_text, reply_markup=reply_markup)
+        try:
+            await update.message.reply_text(message_text, reply_markup=reply_markup)
+        except BadRequest:
+            await update.message.reply_text('Не достаточно ресурсов для 3+1 хостов.')
+
     elif update.callback_query:  # Если это нажатие на кнопку "Вперёд" или "Назад"
         query = update.callback_query
         await query.answer()

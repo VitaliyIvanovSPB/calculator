@@ -67,7 +67,8 @@ def create_config(all_configs, capacity_disk_type, cpu, cpu_hosts, cpu_overcommi
 
         for disk_size, disk_groups in get_raids_data()[key][slack_space].items():
             for disk_group, disks_capacity in disk_groups.items():
-                host_disks_qty = int(str(disk_group)[0]) * int(str(disk_group)[1]) + int(str(disk_group)[0]) + 1 if capacity_disk_type == 'ssd' else 0
+                host_disks_qty = int(str(disk_group)[0]) * int(str(disk_group)[1]) + int(
+                    str(disk_group)[0]) + 1 if capacity_disk_type == 'ssd' else 0
                 host_disks_hba_qty = int(str(disk_group)[0]) * int(str(disk_group)[1])
                 vsan_and_disks_limit = check_vsan_and_disks_limit(cpu_hosts, disks_capacity, host_disks_qty, server,
                                                                   vsan_raw, vssd)
@@ -107,10 +108,14 @@ def create_config(all_configs, capacity_disk_type, cpu, cpu_hosts, cpu_overcommi
                         'CPU overcommit': f'{cpu_overcommit}',
                         'CPU': f'{cpu["name"]} {cpu["price"]}$ - 2 шт',
                         'Server': f'{server["name"]} {server["price"]}$ - 1 шт',
-                        f'{ram["ram_size"]}Gb {ram["ram_gen"]} {ram["price"]}$' : f'{ram_1host} шт',
-                        'Esxi disk': f'{esxi_disc[capacity_disk_type]["disk_type"]} {esxi_disc[capacity_disk_type]["price"]}$ - 1 шт',
-                        'Cache disk': f'{cache_disc["capacity"]} {cache_disc["disk_type"]} {cache_disc["price"]}$ - {int(str(disk_group)[0])} шт',
-                        'Capacity disk': f'{disk_size} {capacity_disk_type} {capacity_disks[capacity_disk_type][disk_size]['price']}$ - {int(str(disk_group)[1]) * int(str(disk_group)[0])} шт',
+                        f'{ram["ram_size"]}Gb {ram["ram_gen"]} {ram["price"]}$': f'{ram_1host} шт',
+                        'Esxi disk': f'{esxi_disc[capacity_disk_type]["disk_type"]} '
+                                     f'{esxi_disc[capacity_disk_type]["price"]}$ - 1 шт',
+                        'Cache disk': f'{cache_disc["capacity"]} {cache_disc["disk_type"]} {cache_disc["price"]}$ - '
+                                      f'{int(str(disk_group)[0])} шт',
+                        'Capacity disk': f'{disk_size} {capacity_disk_type} '
+                                         f'{capacity_disks[capacity_disk_type][disk_size]['price']}$ - '
+                                         f'{int(str(disk_group)[1]) * int(str(disk_group)[0])} шт',
                         'Network card': f'{network_card["name"]} {network_card["price"]}$ - {network_card_qty} шт',
                         'HBA adapter': f'{hba["name"]} - 1 шт' if hba else 0,
                         'Admin main works': f'{works_main}',
