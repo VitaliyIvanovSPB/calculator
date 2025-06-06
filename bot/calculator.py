@@ -114,7 +114,7 @@ def create_config(all_configs, capacity_disk_type, cpu, cpu_hosts, cpu_overcommi
                         'Cache disk': f'{cache_disc["capacity"]} {cache_disc["disk_type"]} {cache_disc["price"]}$ - '
                                       f'{int(str(disk_group)[0])} шт',
                         'Capacity disk': f'{disk_size} {capacity_disk_type} '
-                                         f'{capacity_disks[capacity_disk_type][disk_size]['price']}$ - '
+                                         f'{capacity_disks[capacity_disk_type][disk_size]["price"]}$ - '
                                          f'{int(str(disk_group)[1]) * int(str(disk_group)[0])} шт',
                         'Network card': f'{network_card["name"]} {network_card["price"]}$ - {network_card_qty} шт',
                         'HBA adapter': f'{hba["name"]} - 1 шт' if hba else 0,
