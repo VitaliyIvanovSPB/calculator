@@ -1,12 +1,14 @@
 import json
 import math
 import os
+from uuid import uuid4
 
 import telegram.ext as tg_ext
 from telegram.error import BadRequest
 
-from telegram.ext import filters, MessageHandler, CommandHandler, ContextTypes, CallbackQueryHandler
-from telegram import Update, WebAppInfo, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import filters, MessageHandler, CommandHandler, ContextTypes, CallbackQueryHandler, InlineQueryHandler
+from telegram import Update, WebAppInfo, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardButton, \
+    InlineKeyboardMarkup, InlineQueryResultArticle, InputTextMessageContent
 from telegram.constants import ParseMode
 from .calculator import requested_config
 from .cbr import get_cbr_currency_rate
@@ -23,22 +25,30 @@ text = f'Send me sizing:\n' \
        f'`capacity_disk_type=`(default=ssd)\n' \
        f'`works_main=`(default=vsphere)\n' \
        f'`works_add=`(default=no)\n' \
-       f'(no, vsphere, dr ,veeam, alb, tanzu, vdi, vdi\_public, vdi\_gpu, vdi\_gpu\_public, nsx)\n' \
-       f'`currency=`(default=cbr or 100)\n'
+       f'(no, vsphere, dr ,veeam, alb, tanzu, vdi, vdi\_public, vdi\_gpu, vdi\_gpu\_public, nsx)\n'
 
 
+# f'`currency=`(default=cbr or 100)\n'
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    url = 'https://vitaliyivanovspb.github.io/selectel_vmware'
     keyboard = [
-        [KeyboardButton("Calculator",
-                        web_app=WebAppInfo(url="https://vitaliyivanovspb.github.io/selectel_vmware"))]
+        [KeyboardButton('Calculator', web_app=WebAppInfo(url))]
     ]
 
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+
+    # keyboard = [
+    #     [InlineKeyboardButton("Открыть миниапп", web_app=WebAppInfo(url=url))],
+    # ]
+    # reply_markup = InlineKeyboardMarkup(keyboard)
+
     await context.bot.send_message(chat_id=update.effective_chat.id,
-                                   text=text,
-                                   parse_mode=ParseMode.MARKDOWN, reply_markup=reply_markup)
+                                   # text=text,
+                                   text='Привет, запусти приложение.',
+                                   parse_mode=ParseMode.MARKDOWN,
+                                   reply_markup=reply_markup)
 
 
 async def calculate(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -61,20 +71,20 @@ async def calculate(update: Update, context: ContextTypes.DEFAULT_TYPE):
     cpu_min_frequency = int(args.get('cpu_min_frequency', 0))
     cpu_overcommit = float(args.get('cpu_overcommit', 3))
     works_main = args.get('works_main', 'vsphere')
-    works_add = args.get('works_add', 'no')
+    # works_add = args.get('works_add', 'no')
     network_card_qty = int(args.get('network_card_qty', 1))
-    slack_space = float(args.get('slack_space', 0.2))
+    # slack_space = float(args.get('slack_space', 0.2))
     capacity_disk_type = args.get('capacity_disk_type', 'ssd')
-    usd = get_cbr_currency_rate()
-    currency = int(args.get('currency', math.ceil(usd) if usd else 100))
+    # usd = get_cbr_currency_rate()
+    # currency = int(args.get('currency', math.ceil(usd) if usd else 100))
 
     all_configs = requested_config(vcpu=vcpu, vram=vram, vssd=vssd,
                                    cpu_vendor=cpu_vendor, cpu_min_frequency=cpu_min_frequency,
                                    cpu_overcommit=cpu_overcommit,
-                                   works_main=works_main.lower(), works_add=works_add.lower(),
+                                   works_main=works_main.lower(),
                                    network_card_qty=network_card_qty,
-                                   slack_space=slack_space, capacity_disk_type=capacity_disk_type.lower(),
-                                   currency=currency)
+                                   capacity_disk_type=capacity_disk_type.lower(), )
+    # slack_space=slack_space, currency=currency, works_add=works_add.lower(),)
     context.user_data['configs'] = all_configs
     context.user_data['page'] = 0
     await send_config_page(update, context)
@@ -124,7 +134,7 @@ async def change_page(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 def format_config(index, config):
-    conf = [f'\nТоп {index}:\n']
+    conf = [f'\nКонфиг {index}:\n']
     for key, value in config.items():
         conf.append(f'{key}: {value}\n')
     return "".join(conf)
@@ -142,15 +152,15 @@ async def webapp_data(update: Update, context):
         all_configs = requested_config(vcpu=int(data['vcpu']), vram=int(data['vram']), vssd=int(data['vssd']),
                                        cpu_vendor=data['cpu_vendor'],
                                        cpu_min_frequency=int(data['cpu_min_frequency']),
-                                       cpu_overcommit=float(data['cpu_overcommit']),
+                                       cpu_overcommit=int(data['cpu_overcommit']),
                                        works_main=data['works_main'],
-                                       works_add=data['works_add'],
+                                       # works_add=dict(data).get('works_add', 'no'),
                                        network_card_qty=int(data['network_card_qty']),
-                                       slack_space=float(data['slack_space']),
-                                       capacity_disk_type=data['capacity_disk_type'],
-                                       currency=math.ceil(
-                                           float(data['currency']) if data['currency'] != '' else (
-                                               usd if usd else 100)))
+                                       # slack_space=float(dict(data).get('slack_space', 0.2)),
+                                       capacity_disk_type=data['capacity_disk_type'], )
+        # currency=math.ceil(
+        #     float(dict(data).get('currency', '')) if data['currency'] != '' else (
+        #         usd if usd else 95)))
         context.user_data['configs'] = all_configs
         context.user_data['page'] = 0
         return await send_config_page(update, context)
